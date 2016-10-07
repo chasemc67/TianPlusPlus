@@ -92,7 +92,7 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
     }
 
     @Override
-    public Integer visitExprEqualNot(VCalcParser.ExprEqualNotContext ctx) {
+    public Integer visitExprEqual(VCalcParser.ExprEqualContext ctx) {
         Integer left = visit(ctx.expr(0));
         Integer right = visit(ctx.expr(1));
         if (ctx.op.getType() == VCalcParser.EQUAL) {
@@ -122,7 +122,7 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
     }
 
     @Override
-    public Integer visitExprParens(VCalcParser.ExprParensContext ctx) {
+    public Integer visitExprBrac(VCalcParser.ExprBracContext ctx) {
         Integer value = visit(ctx.expr());
         return value;
     }
