@@ -2,56 +2,50 @@ grammar VCalc;
 
 prog: statement+;
 
-statement: (declaration|assignment|conditional|loop|print|generator) ';';
+statement: (declaration|assignment|conditional|loop|print|generator|filter) ';';
 
-declaration: type assignment         #declAsn
-           | type ID                 #declNoAsn
+type:TYPEVECTOR    #vecType
+    |TYPEINT       #intType
+    ;
+
+declaration: type assignment    #declAsn
+           | type ID            #declNoAsn
            ;
 
-assignment: intAssignment               #assignInt
-          | vecAssignment               #assignVec
-          ;
+assignment: ID '=' expr;
 
-intAssignment: ID '=' expr;
-vecAssignment: ID '=' range;
-
-range: expr '..' expr;
+range: intExpr '..' intExpr;
 
 conditional: STARTIF '(' expr ')' statement+ ENDIF;
 loop: STARTLOOP '(' expr ')' statement+ ENDLOOP;
 print: PRINT '(' expr ')'
      ;
 
-expr: intExpr           #intExpr
-    | vecExpr           #vecExpr
+expr: intExpr
+    | vecExpr
+    ;
 
-
-intExpr: ID                             #exprId
-    | INTEGER                           #exprInt
-    | '(' expr ')'                      #exprParens
-    |  expr op=(MUL|DIV) expr           #exprMulDiv
-    |  expr op=(ADD|SUB) expr           #exprAddSub
-    |  expr op=(GREAT|LESS) expr        #exprGreatLess
-    |  expr op=(EQUAL|NOTEQUAL) expr    #exprEqualNot
+intExpr: ID                                   #exprId
+    | INTEGER                                 #exprInt
+    | '(' intExpr ')'                            #exprParens
+    |  intExpr op=(MUL|DIV) intExpr           #exprMulDiv
+    |  intExpr op=(ADD|SUB) intExpr           #exprAddSub
+    |  intExpr op=(GREAT|LESS) intExpr        #exprGreatLess
+    |  intExpr op=(EQUAL|NOTEQUAL) intExpr    #exprEqualNot
     ;
 
 vecExpr: ID                                #vecExprId
        | '[' (INTEGER)* ']'                #vecExprVec
-       | '(' expr ')'                      #vecExprParens
-       |  expr op=(MUL|DIV) expr           #vecExprMulDiv
-       |  expr op=(ADD|SUB) expr           #vecExprAddSub
-       |  expr op=(GREAT|LESS) expr        #vecExprGreatLess
-       |  expr op=(EQUAL|NOTEQUAL) expr    #vecExprEqualNot
+       | '(' vecExpr ')'                      #vecExprParens
+       |  (vecExpr|intExpr) op=(MUL|DIV) (vecExpr|intExpr)           #vecExprMulDiv
+       |  (vecExpr|intExpr) op=(ADD|SUB) (vecExpr|intExpr)           #vecExprAddSub
+       |  (vecExpr|intExpr) op=(GREAT|LESS) (vecExpr|intExpr)        #vecExprGreatLess
+       |  (vecExpr|intExpr) op=(EQUAL|NOTEQUAL) (vecExpr|intExpr)    #vecExprEqualNot
        |  range                            #vecRange
        |  generator                        #vecGenerator
        ;
 
-
 vecIndex: ID'['expr']';
-
-type: TYPEINT       #intType
-    | TYPEVECTOR    #vecType
-    ;
 
 generator:'[' ID 'in' vecExpr '|' expr ']';
 filter: '[' ID 'in' vecExpr '&' expr ']';
