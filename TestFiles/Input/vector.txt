@@ -1,0 +1,6 @@
+vector i = 1..9;
+print(i);
+i = 2..5
+print(i);
+i = 1 + 1 .. 2 + 2;
+print(i);

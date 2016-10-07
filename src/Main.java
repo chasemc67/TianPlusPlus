@@ -22,7 +22,10 @@ public class Main {
         String inputFile = null;
         String interpreterType = null;
         // Is this the right argument?
-        if (args.length > 0) inputFile = args[0];
+        if (args.length > 0) {
+            interpreterType = args[0];
+            inputFile = args[1];
+        }
         InputStream is = System.in;
         if (inputFile != null) is = new FileInputStream(inputFile);
         ANTLRInputStream input = new ANTLRInputStream(is);
@@ -31,8 +34,13 @@ public class Main {
         VCalcParser parser = new VCalcParser(tokens);
         ParseTree tree = parser.prog();
 
-        InterpreterVisitor eval = new InterpreterVisitor();
-        eval.visit(tree);
+        if(interpreterType.equals("interpret")) {
+            InterpreterVisitor eval = new InterpreterVisitor();
+            eval.visit(tree);
+        } else {
+            LLVMVisitor eval = new LLVMVisitor();
+            eval.visit(tree);
+        }
 
         return;
 
