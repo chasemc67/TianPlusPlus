@@ -20,25 +20,25 @@ conditional: STARTIF '(' expr ')' statement+ ENDIF;
 loop: STARTLOOP '(' expr ')' statement+ ENDLOOP;
 print: PRINT '(' expr ')';
 
-expr: ID
-   | INTEGER
-   | '[' (INTEGER)* ']'
-   | '(' expr ')'
-   |  expr op=(MUL|DIV) expr
-   |  expr op=(ADD|SUB) expr
-   |  expr op=(GREAT|LESS) expr
-   |  expr op=(EQUAL|NOTEQUAL) expr
-   |  range
-   |  generator
+expr: ID                                #exprId
+   | INTEGER                            #exprInt
+   | '[' (INTEGER)* ']'                 #exprVec
+   | '(' expr ')'                       #exprBrac
+   |  expr op=(MUL|DIV) expr            #exprMulDiv
+   |  expr op=(ADD|SUB) expr            #exprAddSub
+   |  expr op=(GREAT|LESS) expr         #exprGreatLess
+   |  expr op=(EQUAL|NOTEQUAL) expr     #exprEqual
+   |  range                             #exprRange
+   |  generator                         #exprGen
    ;
 
-intExpr: ID
-   | INTEGER
-   | '(' intExpr ')'
-   |  intExpr op=(MUL|DIV) intExpr
-   |  intExpr op=(ADD|SUB) intExpr
-   |  intExpr op=(GREAT|LESS) intExpr
-   |  intExpr op=(EQUAL|NOTEQUAL) intExpr
+intExpr: ID                                 #intExprId
+   | INTEGER                                #intExprInt
+   | '(' intExpr ')'                        #intExprBrac
+   |  intExpr op=(MUL|DIV) intExpr          #intExprMulDiv
+   |  intExpr op=(ADD|SUB) intExpr          #intExprAddSub
+   |  intExpr op=(GREAT|LESS) intExpr       #intExprGreatLess
+   |  intExpr op=(EQUAL|NOTEQUAL) intExpr   #intExprEqual
    ;
 
 vecIndex: ID'['expr']';
