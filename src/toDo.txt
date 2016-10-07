@@ -1,6 +1,6 @@
 To Do:
 
-[ in progress.. ] Add stubs for all additional grammar visitor functions
+[+] Add stubs for all additional grammar visitor functions
 
 [ ] Create new class to replace integer for memory storage.
 Needs to accomodate integers and vectors of integers

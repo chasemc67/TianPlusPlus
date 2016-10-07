@@ -10,6 +10,10 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
     Map<String, String> type = new HashMap<String, String>();
 
 
+    @Override public Integer visitVecType(VCalcParser.VecTypeContext ctx) { return visitChildren(ctx); }
+
+    @Override public Integer visitIntType(VCalcParser.IntTypeContext ctx) { return visitChildren(ctx); }
+
     // Need to add type checking and store types properly and stuff
     @Override
     public Integer visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
@@ -53,7 +57,7 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
         return 0;
     }
 
-    @Override public Integer visitRange()
+    @Override public Integer visitRange(VCalcParser.RangeContext ctx) { return visitChildren(ctx); }
 
     @Override
     public Integer visitConditional(VCalcParser.ConditionalContext ctx) {
@@ -91,40 +95,21 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
 
     // Expressions
     @Override
-    public Integer visitExprInt(VCalcParser.ExprIntContext ctx) {
-        Integer value = Integer.valueOf(ctx.INTEGER().getText());
-        return value;
-    }
-
-    @Override
-    public Integer visitExprEqual(VCalcParser.ExprEqualContext ctx) {
-        Integer left = visit(ctx.expr(0));
-        Integer right = visit(ctx.expr(1));
-        if (ctx.op.getType() == VCalcParser.EQUAL) {
-            if(left == right) {return 1;} else {return 0;}
-        } else {
-            if(left != right) {return 1;} else {return 0;}
-        }
-    }
-
-    @Override
-    public Integer visitExprAddSub(VCalcParser.ExprAddSubContext ctx) {
-        Integer left = visit(ctx.expr(0));
-        Integer right = visit(ctx.expr(1));
-        if (ctx.op.getType() == VCalcParser.ADD) {
-            return left + right;
-        } else {
-            return left - right;
-        }
-    }
-
-    @Override
     public Integer visitExprId(VCalcParser.ExprIdContext ctx) {
         String id = ctx.ID().getText();
         if (memory.containsKey(id)) return memory.get(id);
         System.out.println("Error, var hasn't been initialized");
         return 0;
     }
+
+    @Override
+    public Integer visitExprInt(VCalcParser.ExprIntContext ctx) {
+        Integer value = Integer.valueOf(ctx.INTEGER().getText());
+        return value;
+    }
+
+    @Override
+    public Integer visitExprVec(VCalcParser.ExprVecContext ctx) { return visitChildren(ctx); }
 
     @Override
     public Integer visitExprBrac(VCalcParser.ExprBracContext ctx) {
@@ -144,6 +129,17 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
     }
 
     @Override
+    public Integer visitExprAddSub(VCalcParser.ExprAddSubContext ctx) {
+        Integer left = visit(ctx.expr(0));
+        Integer right = visit(ctx.expr(1));
+        if (ctx.op.getType() == VCalcParser.ADD) {
+            return left + right;
+        } else {
+            return left - right;
+        }
+    }
+
+    @Override
     public Integer visitExprGreatLess(VCalcParser.ExprGreatLessContext ctx) {
         Integer left = visit(ctx.expr(0));
         Integer right = visit(ctx.expr(1));
@@ -153,4 +149,53 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
             if(left > right) {return 1;} else {return 0;}
         }
     }
+    
+    @Override
+    public Integer visitExprEqual(VCalcParser.ExprEqualContext ctx) {
+        Integer left = visit(ctx.expr(0));
+        Integer right = visit(ctx.expr(1));
+        if (ctx.op.getType() == VCalcParser.EQUAL) {
+            if(left == right) {return 1;} else {return 0;}
+        } else {
+            if(left != right) {return 1;} else {return 0;}
+        }
+    }
+
+    @Override 
+    public Integer visitExprRange(VCalcParser.ExprRangeContext ctx) { return visitChildren(ctx); }
+
+    @Override
+    public Integer visitExprGen(VCalcParser.ExprGenContext ctx) { return visitChildren(ctx); }
+
+
+
+    @Override
+    public Integer visitIntExprId(VCalcParser.IntExprIdContext ctx) { return visitChildren(ctx); }
+
+    @Override
+    public Integer visitIntExprInt(VCalcParser.IntExprIntContext ctx) { return visitChildren(ctx); }
+
+    @Override
+    public Integer visitIntExprBrac(VCalcParser.IntExprBracContext ctx) { return visitChildren(ctx); }
+
+    @Override
+    public Integer visitIntExprMulDiv(VCalcParser.IntExprMulDivContext ctx) { return visitChildren(ctx); }
+    
+    @Override
+    public Integer visitIntExprAddSub(VCalcParser.IntExprAddSubContext ctx) { return visitChildren(ctx); }
+     
+    @Override
+    public Integer visitIntExprGreatLess(VCalcParser.IntExprGreatLessContext ctx) { return visitChildren(ctx); }
+    
+    @Override
+    public Integer visitIntExprEqual(VCalcParser.IntExprEqualContext ctx) { return visitChildren(ctx); }
+    
+    @Override
+    public Integer visitVecIndex(VCalcParser.VecIndexContext ctx) { return visitChildren(ctx); }
+
+    @Override
+    public Integer visitGenerator(VCalcParser.GeneratorContext ctx) { return visitChildren(ctx); }
+
+    @Override
+    public Integer visitFilter(VCalcParser.FilterContext ctx) { return visitChildren(ctx); }
 }
