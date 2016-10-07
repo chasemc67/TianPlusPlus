@@ -1,0 +1,16 @@
+To Do:
+
+[ in progress.. ] Add stubs for all additional grammar visitor functions
+
+[ ] Create new class to replace integer for memory storage.
+Needs to accomodate integers and vectors of integers
+
+[ ] Change return value of interpreter functions to this new class
+
+[ ] Add scooping code
+
+[ ] Add type checking / type promotion / type safety code
+
+[ ] Fix existing grammar visitor functions
+
+[ ] Fill in stubs for new grammar functions

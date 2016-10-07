@@ -7,7 +7,10 @@ import java.util.Map;
 public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
 
     Map<String, Integer> memory = new HashMap<String, Integer>();
+    Map<String, String> type = new HashMap<String, String>();
 
+
+    // Need to add type checking and store types properly and stuff
     @Override
     public Integer visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
         Integer value = visit(ctx.assignment().expr());
@@ -49,6 +52,8 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
         System.out.println("That variable hasn't been defined yet");
         return 0;
     }
+
+    @Override public Integer visitRange()
 
     @Override
     public Integer visitConditional(VCalcParser.ConditionalContext ctx) {
