@@ -18,37 +18,33 @@ range: intExpr '..' intExpr;
 
 conditional: STARTIF '(' expr ')' statement+ ENDIF;
 loop: STARTLOOP '(' expr ')' statement+ ENDLOOP;
-print: PRINT '(' expr ')'
-     ;
+print: PRINT '(' expr ')';
 
-expr: intExpr
-    | vecExpr
-    ;
+expr: ID
+   | INTEGER
+   | '[' (INTEGER)* ']'
+   | '(' expr ')'
+   |  expr op=(MUL|DIV) expr
+   |  expr op=(ADD|SUB) expr
+   |  expr op=(GREAT|LESS) expr
+   |  expr op=(EQUAL|NOTEQUAL) expr
+   |  range
+   |  generator
+   ;
 
-intExpr: ID                                   #exprId
-    | INTEGER                                 #exprInt
-    | '(' intExpr ')'                            #exprParens
-    |  intExpr op=(MUL|DIV) intExpr           #exprMulDiv
-    |  intExpr op=(ADD|SUB) intExpr           #exprAddSub
-    |  intExpr op=(GREAT|LESS) intExpr        #exprGreatLess
-    |  intExpr op=(EQUAL|NOTEQUAL) intExpr    #exprEqualNot
-    ;
-
-vecExpr: ID                                #vecExprId
-       | '[' (INTEGER)* ']'                #vecExprVec
-       | '(' vecExpr ')'                      #vecExprParens
-       |  (vecExpr|intExpr) op=(MUL|DIV) (vecExpr|intExpr)           #vecExprMulDiv
-       |  (vecExpr|intExpr) op=(ADD|SUB) (vecExpr|intExpr)           #vecExprAddSub
-       |  (vecExpr|intExpr) op=(GREAT|LESS) (vecExpr|intExpr)        #vecExprGreatLess
-       |  (vecExpr|intExpr) op=(EQUAL|NOTEQUAL) (vecExpr|intExpr)    #vecExprEqualNot
-       |  range                            #vecRange
-       |  generator                        #vecGenerator
-       ;
+intExpr: ID
+   | INTEGER
+   | '(' intExpr ')'
+   |  intExpr op=(MUL|DIV) intExpr
+   |  intExpr op=(ADD|SUB) intExpr
+   |  intExpr op=(GREAT|LESS) intExpr
+   |  intExpr op=(EQUAL|NOTEQUAL) intExpr
+   ;
 
 vecIndex: ID'['expr']';
 
-generator:'[' ID 'in' vecExpr '|' expr ']';
-filter: '[' ID 'in' vecExpr '&' expr ']';
+generator: '[' ID 'in' expr '|' expr ']';
+filter: '[' ID 'in' expr '&' expr ']';
 
 MUL: '*';
 DIV: '/';
