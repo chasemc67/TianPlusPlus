@@ -3,199 +3,306 @@
  */
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
-public class InterpreterVisitor extends VCalcBaseVisitor<Integer> {
+public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
-    Map<String, Integer> memory = new HashMap<String, Integer>();
+    Map<String, Stuff> data = new HashMap<String, Stuff>();
     Map<String, String> type = new HashMap<String, String>();
 
 
-    @Override public Integer visitVecType(VCalcParser.VecTypeContext ctx) { return visitChildren(ctx); }
+    @Override 
+    public Stuff visitVecType(VCalcParser.VecTypeContext ctx) { return visitChildren(ctx); }
 
-    @Override public Integer visitIntType(VCalcParser.IntTypeContext ctx) { return visitChildren(ctx); }
+    @Override 
+    public Stuff visitIntType(VCalcParser.IntTypeContext ctx) { return visitChildren(ctx); }
 
     // Need to add type checking and store types properly and stuff
     @Override
-    public Integer visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
-        Integer value = visit(ctx.assignment().expr());
+    public Stuff visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
+        String type = ctx.type().getText();
+        Stuff value = visit(ctx.assignment().expr());
         String id = ctx.assignment().ID().getText();
 
-        if (memory.containsKey(id)) {
-            System.out.println("Var already defined");
-            // throw error;
+        if (!type.equals(value.type)) {
+            System.out.println("Error: Type mismatch");
         }
-        memory.put(id, value);
+
+        if (data.containsKey(id)) {
+            System.out.println("Var already defined");
+        }
+        data.put(id, value);
 
         return value;
     }
 
     @Override
-    public Integer visitDeclNoAsn(VCalcParser.DeclNoAsnContext ctx) {
-        Integer value = 0;
+    public Stuff visitDeclNoAsn(VCalcParser.DeclNoAsnContext ctx) {
+        String type = ctx.type().getText();
+        ArrayList<Integer> tempList = new ArrayList<Integer>();
+        Stuff value;
+
+        if (type.equals("int")) {
+            value = new Stuff(0);
+        } else {
+            tempList.add(0);
+            value = new Stuff(tempList);
+        }
+
         String id = ctx.ID().getText();
 
-        if (memory.containsKey(id)) {
+        if (data.containsKey(id)) {
             System.out.println("Var already defined");
             // throw error;
         }
-        memory.put(id, value);
+        data.put(id, value);
 
         return value;
     }
 
     @Override
-    public Integer visitAssignment(VCalcParser.AssignmentContext ctx) {
-        Integer value = visit(ctx.expr());
+    public Stuff visitAssignment(VCalcParser.AssignmentContext ctx) {
+        Stuff value = visit(ctx.expr());
         String id = ctx.ID().getText();
 
-        if (memory.containsKey(id)) {
-            memory.put(id, value);
+        if (data.containsKey(id)) {
+            data.put(id, value);
             return value;
         }
 
         System.out.println("That variable hasn't been defined yet");
-        return 0;
+        return value;
     }
 
-    @Override public Integer visitRange(VCalcParser.RangeContext ctx) { return visitChildren(ctx); }
+    @Override public Stuff visitRange(VCalcParser.RangeContext ctx) { return visitChildren(ctx); }
 
     @Override
-    public Integer visitConditional(VCalcParser.ConditionalContext ctx) {
-        Integer value = visit(ctx.expr());
-        if (value != 0) {
+    public Stuff visitConditional(VCalcParser.ConditionalContext ctx) {
+        Stuff value = visit(ctx.expr());
+        Stuff returnValue;
+        if (value.intValue != 0) {
             // For each statement, visit statement
             for (VCalcParser.StatementContext statement : ctx.statement()) {
                 visit(statement);
             }
-            return 1;
+            returnValue = new Stuff(1);
+            return returnValue;
         } else {
-            return 0;
+            returnValue = new Stuff(0);
+            return returnValue;
         }
     }
 
     // * To do
     @Override
-    public Integer visitLoop(VCalcParser.LoopContext ctx) {
-        Integer value = visit(ctx.expr());
-        while (value != 0) {
+    public Stuff visitLoop(VCalcParser.LoopContext ctx) {
+        Stuff value = visit(ctx.expr());
+        Stuff returnValue;
+        while (value.intValue != 0) {
             for (VCalcParser.StatementContext statement : ctx.statement()) {
                 visit(statement);
             }
             value = visit(ctx.expr());
         }
-        return 1;
+        returnValue = new Stuff(1);
+        return returnValue;
     }
 
     @Override
-    public Integer visitPrint(VCalcParser.PrintContext ctx) {
-        Integer value = visit(ctx.expr());
-        System.out.println(value);
-        return 0;
+    public Stuff visitPrint(VCalcParser.PrintContext ctx) {
+        Stuff value = visit(ctx.expr());
+        value.print();
+        System.out.println("");
+        return null;
     }
 
     // Expressions
     @Override
-    public Integer visitExprId(VCalcParser.ExprIdContext ctx) {
+    public Stuff visitExprId(VCalcParser.ExprIdContext ctx) {
         String id = ctx.ID().getText();
-        if (memory.containsKey(id)) return memory.get(id);
+        if (data.containsKey(id)) return data.get(id);
         System.out.println("Error, var hasn't been initialized");
-        return 0;
+        return null;
     }
 
     @Override
-    public Integer visitExprInt(VCalcParser.ExprIntContext ctx) {
-        Integer value = Integer.valueOf(ctx.INTEGER().getText());
+    public Stuff visitExprInt(VCalcParser.ExprIntContext ctx) {
+        Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
+        Stuff value = new Stuff(intValue);
         return value;
     }
 
     @Override
-    public Integer visitExprVec(VCalcParser.ExprVecContext ctx) { return visitChildren(ctx); }
+    public Stuff visitExprVec(VCalcParser.ExprVecContext ctx) {
+        ArrayList<Integer> valueList = new ArrayList<Integer>();
+        Stuff value;
+        for (TerminalNode integer : ctx.INTEGER()) {
+            valueList.add(Integer.valueOf(integer.getText()));
+        }
 
-    @Override
-    public Integer visitExprBrac(VCalcParser.ExprBracContext ctx) {
-        Integer value = visit(ctx.expr());
+        value = new Stuff(valueList);
+
         return value;
     }
 
     @Override
-    public Integer visitExprMulDiv(VCalcParser.ExprMulDivContext ctx) {
-        Integer left = visit(ctx.expr(0));
-        Integer right = visit(ctx.expr(1));
-        if (ctx.op.getType() == VCalcParser.MUL) {
-            return left*right;
-        } else {
-            return left/right;
-        }
+    public Stuff visitExprBrac(VCalcParser.ExprBracContext ctx) {
+        Stuff value = visit(ctx.expr());
+        return value;
     }
 
     @Override
-    public Integer visitExprAddSub(VCalcParser.ExprAddSubContext ctx) {
-        Integer left = visit(ctx.expr(0));
-        Integer right = visit(ctx.expr(1));
-        if (ctx.op.getType() == VCalcParser.ADD) {
-            return left + right;
+    public Stuff visitExprMulDiv(VCalcParser.ExprMulDivContext ctx) {
+        Stuff left = visit(ctx.expr(0));
+        Stuff right = visit(ctx.expr(1));
+        Stuff value = null;
+
+        if (left.type.equals("int") && right.type.equals("int")){
+            if (ctx.op.getType() == VCalcParser.MUL) {
+                value = new Stuff(left.intValue * right.intValue);
+            } else {
+                value = new Stuff(left.intValue / right.intValue);
+            }
         } else {
-            return left - right;
+            // To Do
+            System.out.println("I can't handle this yet");
         }
+
+        return value;
     }
 
     @Override
-    public Integer visitExprGreatLess(VCalcParser.ExprGreatLessContext ctx) {
-        Integer left = visit(ctx.expr(0));
-        Integer right = visit(ctx.expr(1));
-        if (ctx.op.getType() == VCalcParser.LESS) {
-            if(left < right) {return 1;} else {return 0;}
+    public Stuff visitExprAddSub(VCalcParser.ExprAddSubContext ctx) {
+        Stuff left = visit(ctx.expr(0));
+        Stuff right = visit(ctx.expr(1));
+        Stuff value = null;
+
+        if (left.type.equals("int") && right.type.equals("int")){
+            if (ctx.op.getType() == VCalcParser.ADD) {
+                value = new Stuff(left.intValue + right.intValue);
+            } else {
+                value = new Stuff(left.intValue - right.intValue);
+            }
         } else {
-            if(left > right) {return 1;} else {return 0;}
+            // To Do
+            System.out.println("I can't handle this yet");
         }
+
+        return value;
+    }
+
+    @Override
+    public Stuff visitExprGreatLess(VCalcParser.ExprGreatLessContext ctx) {
+        Stuff left = visit(ctx.expr(0));
+        Stuff right = visit(ctx.expr(1));
+        Stuff value = null;
+
+        if (left.type.equals("int") && right.type.equals("int")){
+            if (ctx.op.getType() == VCalcParser.LESS) {
+                if (left.intValue < right.intValue) {
+                    value = new Stuff(1);
+                } else {
+                    value = new Stuff(0);
+                }
+            } else {
+                if (left.intValue > right.intValue) {
+                    value = new Stuff(1);
+                } else {
+                    value = new Stuff(0);
+                }
+            }
+        } else {
+            // To Do
+            System.out.println("I can't handle this yet");
+        }
+
+        return value;
     }
     
     @Override
-    public Integer visitExprEqual(VCalcParser.ExprEqualContext ctx) {
-        Integer left = visit(ctx.expr(0));
-        Integer right = visit(ctx.expr(1));
-        if (ctx.op.getType() == VCalcParser.EQUAL) {
-            if(left == right) {return 1;} else {return 0;}
+    public Stuff visitExprEqual(VCalcParser.ExprEqualContext ctx) {
+        Stuff left = visit(ctx.expr(0));
+        Stuff right = visit(ctx.expr(1));
+        Stuff value = null;
+
+        if (left.type.equals("int") && right.type.equals("int")){
+            if (ctx.op.getType() == VCalcParser.EQUAL) {
+                if (left.intValue == right.intValue) {
+                    value = new Stuff(1);
+                } else {
+                    value = new Stuff(0);
+                }
+            } else {
+                if (left.intValue != right.intValue) {
+                    value = new Stuff(1);
+                } else {
+                    value = new Stuff(0);
+                }
+            }
         } else {
-            if(left != right) {return 1;} else {return 0;}
+            // To Do
+            System.out.println("I can't handle this yet");
         }
+
+        return value;
     }
 
     @Override 
-    public Integer visitExprRange(VCalcParser.ExprRangeContext ctx) { return visitChildren(ctx); }
+    public Stuff visitExprRange(VCalcParser.ExprRangeContext ctx) { 
+        Stuff left = visit(ctx.range().intExpr(0));
+        Stuff right = visit(ctx.range().intExpr(1));
+        ArrayList<Integer> newVec = new ArrayList<Integer>();
+        Stuff value;
+
+        if (!left.type.equals("int") || !right.type.equals("int")) {
+            System.out.println("Error, integers expected on both sides");
+        }
+
+        for(int i = left.intValue; i <= right.intValue; i++) {
+            newVec.add(Integer.valueOf(i));
+        }
+
+        value = new Stuff(newVec);
+
+        return value;
+    }
 
     @Override
-    public Integer visitExprGen(VCalcParser.ExprGenContext ctx) { return visitChildren(ctx); }
-
-
+    public Stuff visitExprGen(VCalcParser.ExprGenContext ctx) { return visitChildren(ctx); }
 
     @Override
-    public Integer visitIntExprId(VCalcParser.IntExprIdContext ctx) { return visitChildren(ctx); }
+    public Stuff visitIntExprId(VCalcParser.IntExprIdContext ctx) { return visitChildren(ctx); }
 
     @Override
-    public Integer visitIntExprInt(VCalcParser.IntExprIntContext ctx) { return visitChildren(ctx); }
+    public Stuff visitIntExprInt(VCalcParser.IntExprIntContext ctx) {
+        Stuff value;
+        Integer exprValue = Integer.valueOf(ctx.INTEGER().getText());
+        value = new Stuff(exprValue); 
+        return value;
+    }
 
     @Override
-    public Integer visitIntExprBrac(VCalcParser.IntExprBracContext ctx) { return visitChildren(ctx); }
+    public Stuff visitIntExprBrac(VCalcParser.IntExprBracContext ctx) { return visitChildren(ctx); }
 
     @Override
-    public Integer visitIntExprMulDiv(VCalcParser.IntExprMulDivContext ctx) { return visitChildren(ctx); }
+    public Stuff visitIntExprMulDiv(VCalcParser.IntExprMulDivContext ctx) { return visitChildren(ctx); }
     
     @Override
-    public Integer visitIntExprAddSub(VCalcParser.IntExprAddSubContext ctx) { return visitChildren(ctx); }
+    public Stuff visitIntExprAddSub(VCalcParser.IntExprAddSubContext ctx) { return visitChildren(ctx); }
      
     @Override
-    public Integer visitIntExprGreatLess(VCalcParser.IntExprGreatLessContext ctx) { return visitChildren(ctx); }
+    public Stuff visitIntExprGreatLess(VCalcParser.IntExprGreatLessContext ctx) { return visitChildren(ctx); }
     
     @Override
-    public Integer visitIntExprEqual(VCalcParser.IntExprEqualContext ctx) { return visitChildren(ctx); }
+    public Stuff visitIntExprEqual(VCalcParser.IntExprEqualContext ctx) { return visitChildren(ctx); }
     
     @Override
-    public Integer visitVecIndex(VCalcParser.VecIndexContext ctx) { return visitChildren(ctx); }
+    public Stuff visitVecIndex(VCalcParser.VecIndexContext ctx) { return visitChildren(ctx); }
 
     @Override
-    public Integer visitGenerator(VCalcParser.GeneratorContext ctx) { return visitChildren(ctx); }
+    public Stuff visitGenerator(VCalcParser.GeneratorContext ctx) { return visitChildren(ctx); }
 
     @Override
-    public Integer visitFilter(VCalcParser.FilterContext ctx) { return visitChildren(ctx); }
+    public Stuff visitFilter(VCalcParser.FilterContext ctx) { return visitChildren(ctx); }
 }
