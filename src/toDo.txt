@@ -2,15 +2,21 @@ To Do:
 
 [+] Add stubs for all additional grammar visitor functions
 
-[ ] Create new class to replace integer for memory storage.
+[+] Create new class to replace integer for memory storage.
 Needs to accomodate integers and vectors of integers
 
-[ ] Change return value of interpreter functions to this new class
+[+] Change return value of interpreter functions to this new class
+
+[+] Fix existing grammar visitor functions
+
+[+] Fill in stubs for new grammar functions
+
+[ ] Add vector[i] stuff
+
+[ ] Add vector math functions (vector + vector, vector * vector, etc)
+
+[ ] Add type promotion math functions (vector + int, vector * int, etc)
 
 [ ] Add scooping code
 
 [ ] Add type checking / type promotion / type safety code
-
-[ ] Fix existing grammar visitor functions
-
-[ ] Fill in stubs for new grammar functions
