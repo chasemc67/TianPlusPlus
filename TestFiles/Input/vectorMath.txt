@@ -1,0 +1,12 @@
+vector v = [ 2 2 2 4 5 ];
+vector b = [ 2 2 2 2 2 ];
+vector c = [ 1 3 4 ];
+
+print(v * b);
+print(v * c);
+print(c * v);
+print(b * v);
+
+print(v + b);
+print(v - c);
+print(c / b);

@@ -173,7 +173,7 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
                 if (ctx.op.getType() == VCalcParser.MUL) {
                     outputList.add(left.vectorValues.get(i) * right.vectorValues.get(i));
                 } else {
-                    outputList.add(left.vectorValues.get(i) * right.vectorValues.get(i));
+                    outputList.add(left.vectorValues.get(i) / right.vectorValues.get(i));
                 }
             }
 
@@ -204,12 +204,38 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         Stuff right = visit(ctx.expr(1));
         Stuff value = null;
 
+        ArrayList<Integer> outputList;
+
         if (left.type.equals("int") && right.type.equals("int")){
             if (ctx.op.getType() == VCalcParser.ADD) {
                 value = new Stuff(left.intValue + right.intValue);
             } else {
                 value = new Stuff(left.intValue - right.intValue);
             }
+        } else if (left.type.equals("vector") && right.type.equals("vector")) {
+            outputList = new ArrayList<Integer>();
+
+            for (int i = 0; i < Math.min(left.vectorValues.size(), right.vectorValues.size()); i++) {
+                if (ctx.op.getType() == VCalcParser.ADD) {
+                    outputList.add(left.vectorValues.get(i) + right.vectorValues.get(i));
+                } else {
+                    outputList.add(left.vectorValues.get(i) - right.vectorValues.get(i));
+                }
+            }
+
+            // put the rest of the vals in the list, incase vectors aren't same size
+            if (left.vectorValues.size() > right.vectorValues.size()) {
+                for (int i = left.vectorValues.size() - right.vectorValues.size(); i < left.vectorValues.size(); i++) {
+                    outputList.add(left.vectorValues.get(i));
+                }
+            } else if (left.vectorValues.size() < right.vectorValues.size()) {
+                for (int i = right.vectorValues.size() - left.vectorValues.size(); i < right.vectorValues.size(); i++) {
+                    outputList.add(right.vectorValues.get(i));
+                }
+            }
+            value = new Stuff(outputList);
+
+            
         } else {
             // To Do
             System.out.println("I can't handle this yet");
