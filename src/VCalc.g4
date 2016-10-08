@@ -2,7 +2,7 @@ grammar VCalc;
 
 prog: statement+;
 
-statement: (declaration|assignment|conditional|loop|print|generator|filter) ';';
+statement: (declaration|assignment|conditional|loop|print) ';';
 
 type:TYPEVECTOR    #vecType
     |TYPEINT       #intType
@@ -30,6 +30,7 @@ expr: ID                                #exprId
    |  expr op=(EQUAL|NOTEQUAL) expr     #exprEqual
    |  range                             #exprRange
    |  generator                         #exprGen
+   |  filter                            #exprFil
    ;
 
 intExpr: ID                                 #intExprId

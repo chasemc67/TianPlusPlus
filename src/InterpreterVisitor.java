@@ -289,6 +289,29 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     }
 
     @Override
+    public Stuff visitExprFil(VCalcParser.ExprFilContext ctx) { 
+        // push scope for these vars
+        Stuff returnValue;
+        ArrayList<Integer> newList = new ArrayList<Integer>();
+        String loopId = ctx.filter().ID().getText();
+        Stuff conditionalCheck;
+
+        Stuff range = visit(ctx.filter().expr(0));
+
+        for (Integer arrayInt : range.vectorValues) {
+            Stuff loopVar = new Stuff(arrayInt);
+            data.put(loopId, loopVar);
+            if (visit(ctx.filter().expr(1)).intValue == 1) {
+                newList.add(arrayInt);
+            }
+        }
+
+        returnValue = new Stuff(newList);
+
+        return returnValue;
+    }
+
+    @Override
     public Stuff visitIntExprId(VCalcParser.IntExprIdContext ctx) { 
         String id = ctx.ID().getText();
         if (data.containsKey(id)) return data.get(id);
@@ -403,10 +426,4 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     
     @Override
     public Stuff visitVecIndex(VCalcParser.VecIndexContext ctx) { return visitChildren(ctx); }
-
-    @Override
-    public Stuff visitGenerator(VCalcParser.GeneratorContext ctx) { return visitChildren(ctx); }
-
-    @Override
-    public Stuff visitFilter(VCalcParser.FilterContext ctx) { return visitChildren(ctx); }
 }
