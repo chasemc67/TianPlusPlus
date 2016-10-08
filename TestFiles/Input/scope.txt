@@ -1,0 +1,9 @@
+int i = 0;
+if ( i < 10)
+    print ( i );
+    i = 9;
+    print ( i);
+    int i = 1;
+    print ( i );
+fi ;
+print ( i );

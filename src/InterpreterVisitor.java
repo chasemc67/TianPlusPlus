@@ -4,12 +4,15 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
+
+import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
     Map<String, Stuff> data = new HashMap<String, Stuff>();
     Map<String, String> type = new HashMap<String, String>();
+    Scope scope = new Scope();
 
 
     @Override 
@@ -29,10 +32,11 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
             System.out.println("Error: Type mismatch");
         }
 
-        if (data.containsKey(id)) {
+        if (scope.inCurrentScope(id)) {
             System.out.println("Var already defined");
         }
-        data.put(id, value);
+
+        scope.addToScope(id, value);
 
         return value;
     }
@@ -52,11 +56,11 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
         String id = ctx.ID().getText();
 
-        if (data.containsKey(id)) {
+        if (scope.inCurrentScope(id)) {
             System.out.println("Var already defined");
             // throw error;
         }
-        data.put(id, value);
+        scope.addToScope(id, value);
 
         return value;
     }
@@ -66,26 +70,33 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         Stuff value = visit(ctx.expr());
         String id = ctx.ID().getText();
 
-        if (data.containsKey(id)) {
-            data.put(id, value);
-            return value;
+        if (scope.resolve(id) != null) {
+            scope.assign(id, value);
+        } else {
+            System.out.println("That variable hasn't been defined yet");
         }
-
-        System.out.println("That variable hasn't been defined yet");
-        return value;
+        return null;
     }
 
     @Override public Stuff visitRange(VCalcParser.RangeContext ctx) { return visitChildren(ctx); }
 
     @Override
     public Stuff visitConditional(VCalcParser.ConditionalContext ctx) {
+
+        scope = new Scope(scope);
         Stuff value = visit(ctx.expr());
+        scope = scope.getParent();
+
         Stuff returnValue;
+
         if (value.intValue != 0) {
+            scope = new Scope(scope);
             // For each statement, visit statement
             for (VCalcParser.StatementContext statement : ctx.statement()) {
                 visit(statement);
             }
+            scope = scope.getParent();
+
             returnValue = new Stuff(1);
             return returnValue;
         } else {
@@ -97,13 +108,20 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     // * To do
     @Override
     public Stuff visitLoop(VCalcParser.LoopContext ctx) {
+
+        scope = new Scope(scope);
         Stuff value = visit(ctx.expr());
+        scope = scope.getParent();
+
         Stuff returnValue;
         while (value.intValue != 0) {
+            scope = new Scope(scope);
             for (VCalcParser.StatementContext statement : ctx.statement()) {
                 visit(statement);
             }
             value = visit(ctx.expr());
+            scope = scope.getParent();
+
         }
         returnValue = new Stuff(1);
         return returnValue;
@@ -121,9 +139,11 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     @Override
     public Stuff visitExprId(VCalcParser.ExprIdContext ctx) {
         String id = ctx.ID().getText();
-        if (data.containsKey(id)) return data.get(id);
-        System.out.println("Error, var hasn't been initialized");
-        return null;
+        Stuff s = scope.resolve(id);
+        if(s == null) {
+            System.out.println("Error, var hasn't been initialized");
+        }
+        return s;
     }
 
     @Override
@@ -321,8 +341,10 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     }
 
     @Override
-    public Stuff visitExprGen(VCalcParser.ExprGenContext ctx) { 
+    public Stuff visitExprGen(VCalcParser.ExprGenContext ctx) {
         // push scope for these vars
+        scope = new Scope(scope);
+
         Stuff returnValue;
         ArrayList<Integer> newList = new ArrayList<Integer>();
         String loopId = ctx.generator().ID().getText();
@@ -331,11 +353,14 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
         for (Integer arrayInt : range.vectorValues) {
             Stuff loopVar = new Stuff(arrayInt);
-            data.put(loopId, loopVar);
+            scope.addToScope(loopId, loopVar);
             newList.add(visit(ctx.generator().expr(1)).intValue);
         }
 
         returnValue = new Stuff(newList);
+
+        //pop
+        scope = scope.getParent();
 
         return returnValue;
     }
@@ -343,6 +368,8 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     @Override
     public Stuff visitExprFil(VCalcParser.ExprFilContext ctx) { 
         // push scope for these vars
+        scope = new Scope(scope);
+
         Stuff returnValue;
         ArrayList<Integer> newList = new ArrayList<Integer>();
         String loopId = ctx.filter().ID().getText();
@@ -352,7 +379,7 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
         for (Integer arrayInt : range.vectorValues) {
             Stuff loopVar = new Stuff(arrayInt);
-            data.put(loopId, loopVar);
+            scope.addToScope(loopId, loopVar);
             if (visit(ctx.filter().expr(1)).intValue == 1) {
                 newList.add(arrayInt);
             }
@@ -360,12 +387,15 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
         returnValue = new Stuff(newList);
 
+        //pop
+        scope = scope.getParent();
+
         return returnValue;
     }
 
     @Override
     public Stuff visitExprVecIndex(VCalcParser.ExprVecIndexContext ctx) { 
-        Stuff vector = data.get(ctx.vecIndex().ID().getText());
+        Stuff vector = scope.resolve(ctx.vecIndex().ID().getText());
         Stuff index = visit(ctx.vecIndex().expr());
         Stuff returnValue;
         ArrayList<Integer> returnList;
@@ -387,9 +417,13 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     @Override
     public Stuff visitIntExprId(VCalcParser.IntExprIdContext ctx) { 
         String id = ctx.ID().getText();
-        if (data.containsKey(id)) return data.get(id);
+        Stuff s = scope.resolve(id);
+        if(s != null) {
+            return s;
+        }
         System.out.println("Error, var hasn't been initialized");
-        return null;}
+        return null;
+    }
 
     @Override
     public Stuff visitIntExprInt(VCalcParser.IntExprIntContext ctx) {
