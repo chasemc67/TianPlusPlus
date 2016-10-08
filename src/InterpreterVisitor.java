@@ -179,11 +179,11 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
             // put the rest of the vals in the list, incase vectors aren't same size
             if (left.vectorValues.size() > right.vectorValues.size()) {
-                for (int i = left.vectorValues.size() - right.vectorValues.size(); i < left.vectorValues.size(); i++) {
+                for (int i = 1 + left.vectorValues.size() - right.vectorValues.size(); i < left.vectorValues.size(); i++) {
                     outputList.add(left.vectorValues.get(i));
                 }
             } else if (left.vectorValues.size() < right.vectorValues.size()) {
-                for (int i = right.vectorValues.size() - left.vectorValues.size(); i < right.vectorValues.size(); i++) {
+                for (int i = 1 + right.vectorValues.size() - left.vectorValues.size(); i < right.vectorValues.size(); i++) {
                     outputList.add(right.vectorValues.get(i));
                 }
             }
@@ -225,11 +225,11 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
             // put the rest of the vals in the list, incase vectors aren't same size
             if (left.vectorValues.size() > right.vectorValues.size()) {
-                for (int i = left.vectorValues.size() - right.vectorValues.size(); i < left.vectorValues.size(); i++) {
+                for (int i = 1 + left.vectorValues.size() - right.vectorValues.size(); i < left.vectorValues.size(); i++) {
                     outputList.add(left.vectorValues.get(i));
                 }
             } else if (left.vectorValues.size() < right.vectorValues.size()) {
-                for (int i = right.vectorValues.size() - left.vectorValues.size(); i < right.vectorValues.size(); i++) {
+                for (int i = 1 + right.vectorValues.size() - left.vectorValues.size(); i < right.vectorValues.size(); i++) {
                     outputList.add(right.vectorValues.get(i));
                 }
             }
