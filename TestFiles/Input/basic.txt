@@ -1,2 +1,6 @@
 int i = 1;
 print(i);
+vector x = [];
+vector y = [1];
+print(x);
+print(y); 
