@@ -40,6 +40,21 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	}
 
 	@Override
+    public Void visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
+    	return null;
+    }
+
+    @Override
+    public Void visitDeclNoAsn(VCalcParser.DeclNoAsnContext ctx) {
+    	return null;
+    }
+
+    @Override
+    public Void visitAssignment(VCalcParser.AssignmentContext ctx) {
+    	return null;
+    }
+
+	@Override
 	public Void visitPrint(VCalcParser.PrintContext ctx) {
 	    // Get the value that we'll be printint out onto the stack 
 	    visit(ctx.expr());
