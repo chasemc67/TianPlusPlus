@@ -27,16 +27,17 @@ declare i32 @printf(i8*, ...) #1
 >>
 
 
-writeIntToStack(intValue) ::= <<
-
+writeIntToStack(varNumber, intValue) ::= <<
+%<varNumber> = alloca i32, align 4
+store i32 <intValue>, i32* %<varNumber>
 >>
 
 
-printIntFromStack() ::= <<
-
+printIntFromStack(loaderVar, varNumberOfResult, newVarNumber) ::= <<
+%<loaderVar> = load i32* %<varNumberOfResult>, align 4
+%<newVarNumber> = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 %<loaderVar>)
 >>
 
 printIntConstant(varNumber, value) ::= <<
 %<varNumber> = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 <value>)
-
 >>

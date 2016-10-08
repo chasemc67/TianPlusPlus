@@ -24,7 +24,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	String exitProgram = st3.render();
 
 	// main uses 3 of these right off the bat
-	Integer varCounter = 4;
+	Integer varCounter = 3;
 
 
 	@Override 
@@ -41,15 +41,17 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
 	@Override
 	public Void visitPrint(VCalcParser.PrintContext ctx) {
-	    // Get the value that we'll be printint out onto the stack
+	    // Get the value that we'll be printint out onto the stack 
 	    visit(ctx.expr());
 
 	    // Will need to add some check here for whether we're
 	    // printing an int or vec
-	    ST output = group.getInstanceOf("printIntConstant");
-	    ST output2 = output.add("varNumber", varCounter);
+	    ST output = group.getInstanceOf("printIntFromStack");
+	    ST output2 = output.add("varNumberOfResult", "t" + varCounter.toString());
 	    varCounter += 1;
-	    ST output3 = output.add("value", 13);
+	    ST output3 = output.add("newVarNumber", "t" + varCounter.toString());
+	    varCounter += 1;
+	    ST output4 = output.add("loaderVar", "t" + varCounter.toString());
 	    programBody = programBody + "\n" + output.render();
 	    return null;
 	}
@@ -57,8 +59,10 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	@Override
 	public Void visitExprInt(VCalcParser.ExprIntContext ctx) {
 	    Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
+	    varCounter += 1;
 	    ST output = group.getInstanceOf("writeIntToStack");
-	    ST output2 = output.add("intValue", intValue);
+	    ST output2 = output.add("varNumber", "t" + varCounter.toString());
+	    ST output3 = output.add("intValue", intValue);
 	    programBody = programBody + "\n" + output.render();
 	    return null;
 	}
