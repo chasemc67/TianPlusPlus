@@ -47,11 +47,9 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	    // Will need to add some check here for whether we're
 	    // printing an int or vec
 	    ST output = group.getInstanceOf("printIntFromStack");
-	    ST output2 = output.add("varNumberOfResult", "t" + varCounter.toString());
-	    varCounter += 1;
-	    ST output3 = output.add("newVarNumber", "t" + varCounter.toString());
-	    varCounter += 1;
-	    ST output4 = output.add("loaderVar", "t" + varCounter.toString());
+	    ST output2 = output.add("varNumberOfResult", this.getCurrentVar());
+	    ST output3 = output.add("newVarNumber", this.getNextVar());
+	    ST output4 = output.add("loaderVar", this.getNextVar());
 	    programBody = programBody + "\n" + output.render();
 	    return null;
 	}
@@ -59,12 +57,45 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	@Override
 	public Void visitExprInt(VCalcParser.ExprIntContext ctx) {
 	    Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
-	    varCounter += 1;
 	    ST output = group.getInstanceOf("writeIntToStack");
-	    ST output2 = output.add("varNumber", "t" + varCounter.toString());
+	    ST output2 = output.add("varNumber", this.getNextVar());
 	    ST output3 = output.add("intValue", intValue);
 	    programBody = programBody + "\n" + output.render();
 	    return null;
 	}
 
+	 @Override
+    public Void visitExprAddSub(VCalcParser.ExprAddSubContext ctx) {
+    	visit(ctx.expr(0));
+    	String leftVar = this.getCurrentVar();
+    	visit(ctx.expr(1));
+    	String rightVar = this.getCurrentVar();
+
+    	ST output;
+
+    	if (ctx.op.getType() == VCalcParser.ADD) {
+    		output = group.getInstanceOf("integerAdd");
+    	} else {
+    		output = group.getInstanceOf("integerSub");
+    	}
+    	ST output2 = output.add("leftVar", leftVar);
+    	ST output3 = output.add("rightVar", rightVar);
+    	ST output4 = output.add("tempVar1", getNextVar());
+    	ST output5 = output.add("tempVar2", getNextVar());
+    	ST output6 = output.add("tempVar3", getNextVar());
+    	ST output7 = output.add("resultVar", getNextVar());
+
+    	programBody = programBody + "\n" + output.render();
+    	return null;
+    }
+
+
+    private String getCurrentVar() {
+    	return "t" + varCounter.toString();
+    }
+
+    private String getNextVar() {
+    	varCounter += 1;
+    	return this.getCurrentVar();
+    }
 }
