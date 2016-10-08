@@ -31,6 +31,7 @@ expr: ID                                #exprId
    |  range                             #exprRange
    |  generator                         #exprGen
    |  filter                            #exprFil
+   |  vecIndex                          #exprVecIndex
    ;
 
 intExpr: ID                                 #intExprId
@@ -42,7 +43,7 @@ intExpr: ID                                 #intExprId
    |  intExpr op=(EQUAL|NOTEQUAL) intExpr   #intExprEqual
    ;
 
-vecIndex: ID'['expr']';
+vecIndex: ID '[' expr ']';
 
 generator: '[' ID 'in' expr '|' expr ']';
 filter: '[' ID 'in' expr '&' expr ']';

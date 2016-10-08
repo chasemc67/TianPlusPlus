@@ -312,6 +312,27 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     }
 
     @Override
+    public Stuff visitExprVecIndex(VCalcParser.ExprVecIndexContext ctx) { 
+        Stuff vector = data.get(ctx.vecIndex().ID().getText());
+        Stuff index = visit(ctx.vecIndex().expr());
+        Stuff returnValue;
+        ArrayList<Integer> returnList;
+
+        // index can be an int or vector
+        if (index.type.equals("int")) {
+            returnValue = new Stuff(vector.vectorValues.get(index.intValue));
+        } else {
+            returnList = new ArrayList<Integer>();
+            for (Integer indexVar : index.vectorValues) {
+                returnList.add(vector.vectorValues.get(indexVar));
+            }
+            returnValue = new Stuff(returnList);
+        }
+
+        return returnValue;
+    }
+
+    @Override
     public Stuff visitIntExprId(VCalcParser.IntExprIdContext ctx) { 
         String id = ctx.ID().getText();
         if (data.containsKey(id)) return data.get(id);
@@ -423,7 +444,4 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
         return value;
     }
-    
-    @Override
-    public Stuff visitVecIndex(VCalcParser.VecIndexContext ctx) { return visitChildren(ctx); }
 }

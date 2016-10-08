@@ -11,7 +11,7 @@ Needs to accomodate integers and vectors of integers
 
 [+] Fill in stubs for new grammar functions
 
-[ ] Add vector[i] stuff
+[+] Add vector[i] stuff
 
 [ ] Add vector math functions (vector + vector, vector * vector, etc)
 
