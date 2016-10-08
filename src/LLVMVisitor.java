@@ -23,6 +23,9 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	ST st3 = group.getInstanceOf("exit");
 	String exitProgram = st3.render();
 
+	// main uses 3 of these right off the bat
+	Integer varCounter = 3;
+
 
 	@Override 
 	public Void visitProg(VCalcParser.ProgContext ctx) {
@@ -37,13 +40,31 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	}
 
 	@Override
+    public Void visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
+    	return null;
+    }
+
+    @Override
+    public Void visitDeclNoAsn(VCalcParser.DeclNoAsnContext ctx) {
+    	return null;
+    }
+
+    @Override
+    public Void visitAssignment(VCalcParser.AssignmentContext ctx) {
+    	return null;
+    }
+
+	@Override
 	public Void visitPrint(VCalcParser.PrintContext ctx) {
-	    // Get the value that we'll be printint out onto the stack
+	    // Get the value that we'll be printint out onto the stack 
 	    visit(ctx.expr());
 
 	    // Will need to add some check here for whether we're
 	    // printing an int or vec
-	    ST output = group.getInstanceOf("testPrintIntFromStack");
+	    ST output = group.getInstanceOf("printIntFromStack");
+	    ST output2 = output.add("varNumberOfResult", this.getCurrentVar());
+	    ST output3 = output.add("newVarNumber", this.getNextVar());
+	    ST output4 = output.add("loaderVar", this.getNextVar());
 	    programBody = programBody + "\n" + output.render();
 	    return null;
 	}
@@ -51,10 +72,73 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	@Override
 	public Void visitExprInt(VCalcParser.ExprIntContext ctx) {
 	    Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
-	    ST output = group.getInstanceOf("testWriteIntToStack");
-	    //ST output2 = output.add("intValue", intValue);
+	    ST output = group.getInstanceOf("writeIntToStack");
+	    ST output2 = output.add("varNumber", this.getNextVar());
+	    ST output3 = output.add("intValue", intValue);
 	    programBody = programBody + "\n" + output.render();
 	    return null;
 	}
 
+	@Override
+    public Void visitExprMulDiv(VCalcParser.ExprMulDivContext ctx) {
+    	visit(ctx.expr(0));
+    	String leftVar = this.getCurrentVar();
+    	visit(ctx.expr(1));
+    	String rightVar = this.getCurrentVar();
+
+    	ST output;
+
+    	if (ctx.op.getType() == VCalcParser.MUL) {
+    		output = group.getInstanceOf("integerMul");
+    	} else {
+    		output = group.getInstanceOf("integerDiv");
+    	}
+    	ST output2 = output.add("leftVar", leftVar);
+    	ST output3 = output.add("rightVar", rightVar);
+    	ST output4 = output.add("tempVar1", getNextVar());
+    	ST output5 = output.add("tempVar2", getNextVar());
+    	ST output6 = output.add("tempVar3", getNextVar());
+    	ST output7 = output.add("resultVar", getNextVar());
+
+    	programBody = programBody + "\n" + output.render();
+    	return null;
+    }
+
+
+	@Override
+    public Void visitExprAddSub(VCalcParser.ExprAddSubContext ctx) {
+    	visit(ctx.expr(0));
+    	String leftVar = this.getCurrentVar();
+    	visit(ctx.expr(1));
+    	String rightVar = this.getCurrentVar();
+
+    	ST output;
+
+    	if (ctx.op.getType() == VCalcParser.ADD) {
+    		output = group.getInstanceOf("integerAdd");
+    	} else {
+    		output = group.getInstanceOf("integerSub");
+    	}
+    	ST output2 = output.add("leftVar", leftVar);
+    	ST output3 = output.add("rightVar", rightVar);
+    	ST output4 = output.add("tempVar1", getNextVar());
+    	ST output5 = output.add("tempVar2", getNextVar());
+    	ST output6 = output.add("tempVar3", getNextVar());
+    	ST output7 = output.add("resultVar", getNextVar());
+
+    	programBody = programBody + "\n" + output.render();
+    	return null;
+    }
+
+
+
+
+    private String getCurrentVar() {
+    	return "t" + varCounter.toString();
+    }
+
+    private String getNextVar() {
+    	varCounter += 1;
+    	return this.getCurrentVar();
+    }
 }
