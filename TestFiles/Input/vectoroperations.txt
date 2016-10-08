@@ -2,6 +2,6 @@ vector i = 1..5;
 print(i);
 i = 1 + 1 .. 2 + 2;
 print(i);
-vector j = 1..5
-vector k = 1..6
+vector j = 1..5;
+vector k = 1..6;
 print(j+k);
