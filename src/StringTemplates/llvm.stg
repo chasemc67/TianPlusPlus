@@ -10,7 +10,12 @@ target triple = "x86_64-pc-linux-gnu"
 main() ::= <<
 ; Function Attrs: nounwind uwtable
 define i32 @main(i32 %argc, i8** %argv) #0 {
-
+%1 = alloca i32, align 4
+%2 = alloca i32, align 4
+%3 = alloca i8**, align 8
+store i32 0, i32* %1
+store i32 %argc, i32* %2, align 4
+store i8** %argv, i8*** %3, align 8
 >>
 
 
@@ -22,32 +27,16 @@ declare i32 @printf(i8*, ...) #1
 >>
 
 
-testWriteIntToStack() ::= <<
-%1 = alloca i32, align 4
-%2 = alloca i32, align 4
-%3 = alloca i8**, align 8
-%x = alloca i32, align 4
-store i32 0, i32* %1
-store i32 %argc, i32* %2, align 4
-store i8** %argv, i8*** %3, align 8
-store i32 12, i32* %x, align 4
-
->>
-
-
-testPrintIntFromStack() ::= <<
-%4 = load i32* %x, align 4
-%5 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 %4)
-%6 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 15)
-
->>
-
-
 writeIntToStack(intValue) ::= <<
 
 >>
 
 
 printIntFromStack() ::= <<
+
+>>
+
+printIntConstant(varNumber, value) ::= <<
+%<varNumber> = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 <value>)
 
 >>
