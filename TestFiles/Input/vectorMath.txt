@@ -17,3 +17,4 @@ vector g = [i in 1..20 | i];
 
 print(g * f);
 print(g);
+print(f * g);
