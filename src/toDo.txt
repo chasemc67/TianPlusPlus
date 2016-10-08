@@ -19,12 +19,11 @@ Needs to accomodate integers and vectors of integers
 
 [ ] Add type promotion math functions (vector + int, vector * int, etc)
 
-[ ] Add scooping code
+[ ] Add scoping code
 
 [ ] Add type checking / type promotion / type safety code
 
-[+] vector i = 1 + 1 .. 2 + 2 doesn't work, reads as 1 + (range 1..2) + 2
-
+[ ] Get basic LLVM print integer working
 
 
 Question:
