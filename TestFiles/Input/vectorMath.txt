@@ -10,3 +10,10 @@ print(b * v);
 print(v + b);
 print(v - c);
 print(c / b);
+
+
+vector f = [ 1 1 1 ];
+vector g = [i in 1..20 | i];
+
+print(g * f);
+print(g);
