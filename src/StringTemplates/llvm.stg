@@ -24,6 +24,14 @@ writeIntToStack(varNumber, intValue) ::= <<
 store i32 <intValue>, i32* %<varNumber>
 >>
 
+declareIntVar(varName) ::= <<
+%<varName> = alloca i32, align 4
+>>
+
+assignIntToVar(varName, assignResult, tempVar1) ::= <<
+%<tempVar1> = load i32* %<assignResult>, align 4
+store i32 %<tempVar1>, i32* <varName>
+>>
 
 printIntFromStack(loaderVar, varNumberOfResult, newVarNumber) ::= <<
 %<loaderVar> = load i32* %<varNumberOfResult>, align 4

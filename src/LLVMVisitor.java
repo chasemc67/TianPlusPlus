@@ -41,16 +41,29 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
 	@Override
     public Void visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
+    	String userDefinedName = ctx.assignment.ID().getText();
+
+    	ST output = group.getInstanceOf("declareIntVar");
+    	ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
+    	visit(ctx.assignment.expr());
     	return null;
     }
 
     @Override
     public Void visitDeclNoAsn(VCalcParser.DeclNoAsnContext ctx) {
+    	String userDefinedName = ctx.ID().getText();
+    	ST output = group.getInstanceOf("declareIntVar")
+    	ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
     	return null;
     }
 
     @Override
     public Void visitAssignment(VCalcParser.AssignmentContext ctx) {
+    	String userDefinedName = ctx.ID().getText();
+    	ST output = group.getInstanceOf("assignIntToVar");
+    	ST output2 = output.add("varName", getNextForUserVar(scope, userDefinedName));
+    	ST output3 = output.add("assignResult", getCurrentVar());
+    	ST output3 = output.add("tempVar1", getNextVar());
     	return null;
     }
 
@@ -185,8 +198,6 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	}
 
 
-
-
     private String getCurrentVar() {
     	return "t" + varCounter.toString();
     }
@@ -194,5 +205,13 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     private String getNextVar() {
     	varCounter += 1;
     	return this.getCurrentVar();
+    }
+
+    private String getNextForUserVar(scope, userDefinedName) {
+
+    }
+
+    private String getCurrentForUserVar(scope, userDefinedName) {
+
     }
 }
