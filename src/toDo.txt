@@ -23,7 +23,9 @@ Needs to accomodate integers and vectors of integers
 
 [ ] Add type checking / type promotion / type safety code
 
-[ ] Get basic LLVM print integer working
+[+] Get basic LLVM print integer working
+
+[ ] Get LLVM integer assign working
 
 
 Question:

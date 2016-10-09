@@ -30,7 +30,11 @@ declareIntVar(varName) ::= <<
 
 assignIntToVar(varName, assignResult, tempVar1) ::= <<
 %<tempVar1> = load i32* %<assignResult>, align 4
-store i32 %<tempVar1>, i32* <varName>
+store i32 %<tempVar1>, i32* %<varName>
+>>
+
+writeIntIdToVar(varName, resultVar) ::= <<
+store i32* %<varName>, i32* %<resultVar>
 >>
 
 printIntFromStack(loaderVar, varNumberOfResult, newVarNumber) ::= <<
