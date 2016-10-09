@@ -19,12 +19,11 @@ conditional: STARTIF '(' expr ')' statement+ ENDIF;
 loop: STARTLOOP '(' expr ')' statement+ ENDLOOP;
 print: PRINT '(' expr ')';
 
-
-expr: generator                          #exprGenerator
-    | filter                             #exprFilter
-    | expr '[' expr ']'                  #exprIndex
+expr: generator                          #exprGen
+    | filter                             #exprFil
     | expr '..' expr                     #exprRange
-    | '[' (INTEGER)* ']'                 #exprLiteral
+    | '[' (INTEGER)* ']'                 #exprVec
+    | expr '[' expr ']'                  #exprIndex
     | expr op=(MUL|DIV) expr             #exprMulDiv
     | expr op=(ADD|SUB) expr             #exprAddSub
     | expr op=(GREAT|LESS) expr          #exprGreatLess

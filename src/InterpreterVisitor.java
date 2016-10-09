@@ -78,8 +78,6 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         return null;
     }
 
-    @Override public Stuff visitRange(VCalcParser.RangeContext ctx) { return visitChildren(ctx); }
-
     @Override
     public Stuff visitConditional(VCalcParser.ConditionalContext ctx) {
 
@@ -322,8 +320,8 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
     @Override 
     public Stuff visitExprRange(VCalcParser.ExprRangeContext ctx) { 
-        Stuff left = visit(ctx.range().intExpr(0));
-        Stuff right = visit(ctx.range().intExpr(1));
+        Stuff left = visit(ctx.expr(0));
+        Stuff right = visit(ctx.expr(1));
         ArrayList<Integer> newVec = new ArrayList<Integer>();
         Stuff value;
 
@@ -394,9 +392,10 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     }
 
     @Override
-    public Stuff visitExprVecIndex(VCalcParser.ExprVecIndexContext ctx) { 
-        Stuff vector = scope.resolve(ctx.vecIndex().ID().getText());
-        Stuff index = visit(ctx.vecIndex().expr());
+    public Stuff visitExprIndex(VCalcParser.ExprIndexContext ctx) {
+
+        Stuff vector = visit(ctx.expr(0));
+        Stuff index = visit(ctx.expr(1));
         Stuff returnValue;
         ArrayList<Integer> returnList;
 
@@ -412,122 +411,5 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         }
 
         return returnValue;
-    }
-
-    @Override
-    public Stuff visitIntExprId(VCalcParser.IntExprIdContext ctx) { 
-        String id = ctx.ID().getText();
-        Stuff s = scope.resolve(id);
-        if(s != null) {
-            return s;
-        }
-        System.out.println("Error, var hasn't been initialized");
-        return null;
-    }
-
-    @Override
-    public Stuff visitIntExprInt(VCalcParser.IntExprIntContext ctx) {
-        Stuff value;
-        Integer exprValue = Integer.valueOf(ctx.INTEGER().getText());
-        value = new Stuff(exprValue); 
-        return value;
-    }
-
-    @Override
-    public Stuff visitIntExprBrac(VCalcParser.IntExprBracContext ctx) { 
-        Stuff value = visit(ctx.intExpr());
-        return value;
-    }
-
-    @Override
-    public Stuff visitIntExprMulDiv(VCalcParser.IntExprMulDivContext ctx) { 
-        Stuff left = visit(ctx.intExpr(0));
-        Stuff right = visit(ctx.intExpr(1));
-        Stuff value = null;
-
-        if (left.type.equals("int") && right.type.equals("int")){
-            if (ctx.op.getType() == VCalcParser.MUL) {
-                value = new Stuff(left.intValue * right.intValue);
-            } else {
-                value = new Stuff(left.intValue / right.intValue);
-            }
-        } else {
-            System.out.println("Error: Expected ints and saw at least one vector");
-        }
-
-        return value;
-    }
-    
-    @Override
-    public Stuff visitIntExprAddSub(VCalcParser.IntExprAddSubContext ctx) { 
-        Stuff left = visit(ctx.intExpr(0));
-        Stuff right = visit(ctx.intExpr(1));
-        Stuff value = null;
-
-        if (left.type.equals("int") && right.type.equals("int")){
-            if (ctx.op.getType() == VCalcParser.ADD) {
-                value = new Stuff(left.intValue + right.intValue);
-            } else {
-                value = new Stuff(left.intValue - right.intValue);
-            }
-        } else {
-            System.out.println("Error: Expected ints and saw at least one vector");
-        }
-
-        return value;
-    }
-     
-    @Override
-    public Stuff visitIntExprGreatLess(VCalcParser.IntExprGreatLessContext ctx) { 
-        Stuff left = visit(ctx.intExpr(0));
-        Stuff right = visit(ctx.intExpr(1));
-        Stuff value = null;
-
-        if (left.type.equals("int") && right.type.equals("int")){
-            if (ctx.op.getType() == VCalcParser.LESS) {
-                if (left.intValue < right.intValue) {
-                    value = new Stuff(1);
-                } else {
-                    value = new Stuff(0);
-                }
-            } else {
-                if (left.intValue > right.intValue) {
-                    value = new Stuff(1);
-                } else {
-                    value = new Stuff(0);
-                }
-            }
-        } else {
-            System.out.println("Error: Expected ints and saw at least one vector");
-        }
-
-        return value;
-    }
-    
-    @Override
-    public Stuff visitIntExprEqual(VCalcParser.IntExprEqualContext ctx) { 
-        Stuff left = visit(ctx.intExpr(0));
-        Stuff right = visit(ctx.intExpr(1));
-        Stuff value = null;
-
-        if (left.type.equals("int") && right.type.equals("int")){
-            if (ctx.op.getType() == VCalcParser.EQUAL) {
-                if (left.intValue == right.intValue) {
-                    value = new Stuff(1);
-                } else {
-                    value = new Stuff(0);
-                }
-            } else {
-                if (left.intValue != right.intValue) {
-                    value = new Stuff(1);
-                } else {
-                    value = new Stuff(0);
-                }
-            }
-        } else {
-            System.out.println("Error: Expected ints and saw at least one vector");
-        }
-
-        return value;
     }
 }
