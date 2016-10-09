@@ -22,6 +22,7 @@ print: PRINT '(' expr ')';
 
 intExpr: ID                                 #intExprId
    | INTEGER                                #intExprInt
+   |  vecIndex                              #intVecIndex
    | '(' intExpr ')'                        #intExprBrac
    |  intExpr op=(MUL|DIV) intExpr          #intExprMulDiv
    |  intExpr op=(ADD|SUB) intExpr          #intExprAddSub

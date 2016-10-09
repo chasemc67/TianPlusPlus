@@ -32,9 +32,9 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
             System.out.println("Error: Type mismatch");
         }
 
-        if (scope.inCurrentScope(id)) {
-            System.out.println("Var already defined");
-        }
+//        if (scope.inCurrentScope(id)) {
+//            System.out.println("Var already defined");
+//        }
 
         scope.addToScope(id, value);
 
@@ -56,10 +56,10 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
 
         String id = ctx.ID().getText();
 
-        if (scope.inCurrentScope(id)) {
-            System.out.println("Var already defined");
-            // throw error;
-        }
+//        if (scope.inCurrentScope(id)) {
+//            System.out.println("Var already defined");
+//            // throw error;
+//        }
         scope.addToScope(id, value);
 
         return value;
