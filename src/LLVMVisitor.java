@@ -130,6 +130,60 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     	return null;
     }
 
+    @Override
+	public Void visitExprGreatLess(VCalcParser.ExprGreatLessContext ctx) {
+		visit(ctx.expr(0));
+		String leftVar = this.getCurrentVar();
+		visit(ctx.expr(1));
+		String rightVar = this.getCurrentVar();
+
+		ST output;
+
+		if (ctx.op.getType() == VCalcParser.GREAT) {
+			output = group.getInstanceOf("integerGreat");
+		} else {
+			output = group.getInstanceOf("integerLess");
+		}
+		ST output2 = output.add("leftVar", leftVar);
+		ST output3 = output.add("rightVar", rightVar);
+		ST output4 = output.add("tempVar1", getNextVar());
+		ST output5 = output.add("tempVar2", getNextVar());
+		ST output6 = output.add("tempVar3", getNextVar());
+		ST output7 = output.add("tempVar4", getNextVar());
+		ST output8 = output.add("resultVar", getNextVar());
+
+		programBody = programBody + "\n" + output.render();
+		return null;
+	}
+
+
+
+	@Override
+	public Void visitExprEqual(VCalcParser.ExprEqualContext ctx) {
+		visit(ctx.expr(0));
+		String leftVar = this.getCurrentVar();
+		visit(ctx.expr(1));
+		String rightVar = this.getCurrentVar();
+
+		ST output;
+
+		if (ctx.op.getType() == VCalcParser.EQUAL) {
+			output = group.getInstanceOf("integerEquals");
+		} else {
+			output = group.getInstanceOf("integerNotEquals");
+		}
+		ST output2 = output.add("leftVar", leftVar);
+		ST output3 = output.add("rightVar", rightVar);
+		ST output4 = output.add("tempVar1", getNextVar());
+		ST output5 = output.add("tempVar2", getNextVar());
+		ST output6 = output.add("tempVar3", getNextVar());
+		ST output7 = output.add("tempVar4", getNextVar());
+		ST output8 = output.add("resultVar", getNextVar());
+
+		programBody = programBody + "\n" + output.render();
+		return null;
+	}
+
 
 
 
