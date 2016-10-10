@@ -6,7 +6,7 @@ import org.stringtemplate.v4.*;
 
 public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
-	Scope scope = new Scope();
+	LLVMScope scope = new LLVMScope();
 	Integer scopeCounter = 0;
 
 	STGroup group = new STGroupFile("./src/StringTemplates/llvm.stg");
@@ -34,8 +34,6 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
 	Map<String, Integer> userVarCounter = new HashMap<String, Integer>();
 
-	Map<String, String> userVarType = new HashMap<String, String>();
-
     String currentType = "int";
 
 
@@ -54,19 +52,20 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	@Override
     public Void visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
     	String userDefinedName = ctx.assignment().ID().getText();
+        String llvmName = 
 
     	if (userVarCounter.containsKey(userDefinedName)){
     		System.out.println("Var has already been defined");
     	}
-    	userVarCounter.put(userDefinedName, 0);
 
 		if (ctx.type().getText().equals("int")) {
+            scope.addToScope(userDefinedName, getLLVMVarName(userDefinedName), "int")
 			userVarType.put(userDefinedName, "int");
 			ST output = group.getInstanceOf("declareIntVar");
 			ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
 			programBody = programBody + "\n" + output.render();
 		} else {
-			userVarType.put(userDefinedName, "vector");
+			scope.addToScope(userDefinedName, getLLVMVarName(userDefinedName), "vector")
 			ST output = group.getInstanceOf("declareVecVar")
 						.add("varName", getCurrentForUserVar(scope, userDefinedName));
 			programBody = programBody + "\n" + output.render();
@@ -86,12 +85,12 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
         userVarCounter.put(userDefinedName, 0);
 
         if (ctx.type().getText().equals("int")) {
-            userVarType.put(userDefinedName, "int");
+            scope.addToScope(userDefinedName, getLLVMVarName(userDefinedName), "int")
             ST output = group.getInstanceOf("declareIntVar");
             ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
             programBody = programBody + "\n" + output.render();
         } else {
-            userVarType.put(userDefinedName, "vector");
+            scope.addToScope(userDefinedName, getLLVMVarName(userDefinedName), "vector")
             ST output = group.getInstanceOf("declareVecVar")
                         .add("varName", getCurrentForUserVar(scope, userDefinedName));
             programBody = programBody + "\n" + output.render();
@@ -105,7 +104,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     	String userDefinedName = ctx.ID().getText();
     	visit(ctx.expr());
     	String exprResult = getCurrentVar();
-		if (userVarType.get(userDefinedName).equals("int")) {
+		if (scope.getLLVMType(userDefinedName).equals("int")) {
 			ST output = group.getInstanceOf("assignIntToVar");
 			ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
 			ST output3 = output.add("assignResult", exprResult);
@@ -156,6 +155,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
 	@Override
 	public Void visitExprInt(VCalcParser.ExprIntContext ctx) {
+        System.out.println("; bro, im gonna print an int");
 	    Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
 	    ST output = group.getInstanceOf("writeIntToStack");
 	    ST output2 = output.add("varNumber", this.getNextVar());
@@ -319,14 +319,16 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     	return this.getCurrentVar();
     }
 
-    private String getCurrentForUserVar(Scope scope, String userDefinedName) {
-    	Integer userVarCount = userVarCounter.get(userDefinedName);
-    	return "s" + scopeCounter.toString() + userDefinedName + userVarCount.toString();
+    private String getLLVMVarName(LLVMScope scope, String userDefinedName) {
+        return "s" + scope.getScopeNumber() + "var" + userDefinedName;
     }
 
-    private String getNextForUserVar(Scope scope, String userDefinedName) {
-    	Integer userVarCount = userVarCounter.get(userDefinedName) + 1;
-    	userVarCounter.put(userDefinedName, userVarCount);
+    private String getCurrentForUserVar(LLVMScope scope, String userDefinedName) {
+        return (getLLVMVarName(scope, userDefinedName) + scope.getVarCounter(userDefinedName).toString());
+    }
+
+    private String getNextForUserVar(LLVMScope scope, String userDefinedName) {
+        scope.incrementVarCounter(userDefinedName);
     	return this.getCurrentForUserVar(scope, userDefinedName);
     }
 }
