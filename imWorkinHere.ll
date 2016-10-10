@@ -173,7 +173,7 @@ define i32 @main(i32 %argc, i8** %argv) #0 {
   %var10 = alloca i32, i64 %8, align 16            ;the result
   %9 = call i8* @llvm.stacksave()
   store i8* %9, i8** %3
-  %10 = load i32* %startRange, align 4
+  %10 = load i32* %startRange, align 4   ;ignore this
   %11 = load i32* %startRange, align 4
   %12 = load i32* %endRange, align 4
   call void @createRange(i32* %var10, i32 %11, i32 %12)
