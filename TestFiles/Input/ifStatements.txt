@@ -1,0 +1,7 @@
+int i = 6;
+if (i > 6)
+print(20);
+fi;
+if (i == 6)
+print(6);
+fi;
