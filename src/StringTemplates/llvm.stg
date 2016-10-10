@@ -5,8 +5,9 @@ target triple = "x86_64-pc-linux-gnu"
 
 @p = global i32 9, align 4
 @.str = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
-@.str1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
-@.str2 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@.str1 = private unnamed_addr constant [2 x i8] c"[\00", align 1
+@.str2 = private unnamed_addr constant [4 x i8] c"%d\00", align 1
+@.str3 = private unnamed_addr constant [4 x i8] c" ]\0A\00", align 1
 
 
 
@@ -40,7 +41,7 @@ define void @printVec(i32* %x) #0 {
   %1 = alloca i32*, align 8
   %i = alloca i32, align 4
   store i32* %x, i32** %1, align 8
-  %2 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0))
+  %2 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.str1, i32 0, i32 0))
   store i32 1, i32* %i, align 4
   br label %3
   %4 = load i32* %i, align 4
@@ -55,13 +56,13 @@ define void @printVec(i32* %x) #0 {
   %13 = load i32** %1, align 8
   %14 = getelementptr inbounds i32* %13, i64 %12
   %15 = load i32* %14, align 4
-  %16 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str1, i32 0, i32 0), i32 %15)
+  %16 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str2, i32 0, i32 0), i32 %15)
   br label %17
   %18 = load i32* %i, align 4
   %19 = add nsw i32 %18, 1
   store i32 %19, i32* %i, align 4
   br label %3
-  %21 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str2, i32 0, i32 0))
+  %21 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str3, i32 0, i32 0))
   ret void
 }
 
