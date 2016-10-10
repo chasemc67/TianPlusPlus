@@ -4,7 +4,7 @@ import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stringtemplate.v4.*;
 
-public class LLVMVisitor extends VCalcBaseVisitor<Void> {
+public class LLVMVisitor extends VCalcBaseVisitor<String> {
 
 	LLVMScope scope = new LLVMScope();
 	Integer scopeCounter = 0;
@@ -38,7 +38,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
 
 	@Override
-	public Void visitProg(VCalcParser.ProgContext ctx) {
+	public String visitProg(VCalcParser.ProgContext ctx) {
 		// Have the children all write their subroutines to the program
 		// body and variable declarations
 		visitChildren(ctx);
@@ -50,7 +50,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	}
 
 	@Override
-    public Void visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
+    public String visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
     	String userDefinedName = ctx.assignment().ID().getText();
 
 		if (ctx.type().getText().equals("int")) {
@@ -70,7 +70,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitDeclNoAsn(VCalcParser.DeclNoAsnContext ctx) {
+    public String visitDeclNoAsn(VCalcParser.DeclNoAsnContext ctx) {
     	String userDefinedName = ctx.ID().getText();
 
         if (userVarCounter.containsKey(userDefinedName)){
@@ -94,7 +94,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitAssignment(VCalcParser.AssignmentContext ctx) {
+    public String visitAssignment(VCalcParser.AssignmentContext ctx) {
     	String userDefinedName = ctx.ID().getText();
     	visit(ctx.expr());
     	String exprResult = getCurrentVar();
@@ -115,12 +115,12 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     }
 
 	@Override
-	public Void visitPrint(VCalcParser.PrintContext ctx) {
+	public String visitPrint(VCalcParser.PrintContext ctx) {
 
 	    // Get the value that we'll be printint out onto the stack
-	    visit(ctx.expr());
+	    String type = visit(ctx.expr());
 
-        if (currentType.equals("int")) {
+        if (type.equals("int")) {
             ST output = group.getInstanceOf("printIntFromStack");
             ST output2 = output.add("varNumberOfResult", this.getCurrentVar());
             ST output3 = output.add("newVarNumber", this.getNextVar());
@@ -136,30 +136,34 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	}
 
 	@Override
-    public Void visitExprId(VCalcParser.ExprIdContext ctx) {
+    public String visitExprId(VCalcParser.ExprIdContext ctx) {
         String userDefinedName = ctx.ID().getText();
+        String type = scope.getLLVMType(userDefinedName);
 
-        ST output = group.getInstanceOf("writeIntIdToVar");
-        ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
-        ST output3 = output.add("tempVar1", getNextVar());
-        ST output4 = output.add("resultVar", getNextVar());
-        programBody = programBody + "\n" + output.render();
-        return null;
+        if (type.equals("int")) {
+            ST output = group.getInstanceOf("writeIntIdToVar");
+            ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
+            ST output3 = output.add("tempVar1", getNextVar());
+            ST output4 = output.add("resultVar", getNextVar());
+            programBody = programBody + "\n" + output.render();
+        } else  {
+            ST output = group.getInstanceOf("assignVectorToVar");
+        }
+        return type;
     }
 
 	@Override
-	public Void visitExprInt(VCalcParser.ExprIntContext ctx) {
-        System.out.println("; bro, im gonna print an int");
+	public String visitExprInt(VCalcParser.ExprIntContext ctx) {
 	    Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
 	    ST output = group.getInstanceOf("writeIntToStack");
 	    ST output2 = output.add("varNumber", this.getNextVar());
 	    ST output3 = output.add("intValue", intValue);
 	    programBody = programBody + "\n" + output.render();
-	    return null;
+	    return "int";
 	}
 
 	@Override
-    public Void visitExprMulDiv(VCalcParser.ExprMulDivContext ctx) {
+    public String visitExprMulDiv(VCalcParser.ExprMulDivContext ctx) {
     	visit(ctx.expr(0));
     	String leftVar = this.getCurrentVar();
     	visit(ctx.expr(1));
@@ -185,7 +189,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
 
 	@Override
-    public Void visitExprAddSub(VCalcParser.ExprAddSubContext ctx) {
+    public String visitExprAddSub(VCalcParser.ExprAddSubContext ctx) {
     	visit(ctx.expr(0));
     	String leftVar = this.getCurrentVar();
     	visit(ctx.expr(1));
@@ -210,7 +214,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     }
 
     @Override
-	public Void visitExprGreatLess(VCalcParser.ExprGreatLessContext ctx) {
+	public String visitExprGreatLess(VCalcParser.ExprGreatLessContext ctx) {
 		visit(ctx.expr(0));
 		String leftVar = this.getCurrentVar();
 		visit(ctx.expr(1));
@@ -238,7 +242,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
 
 	@Override
-	public Void visitExprEqual(VCalcParser.ExprEqualContext ctx) {
+	public String visitExprEqual(VCalcParser.ExprEqualContext ctx) {
 		visit(ctx.expr(0));
 		String leftVar = this.getCurrentVar();
 		visit(ctx.expr(1));
@@ -264,7 +268,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	}
 
 	@Override
-    public Void visitExprVec(VCalcParser.ExprVecContext ctx) {
+    public String visitExprVec(VCalcParser.ExprVecContext ctx) {
 //        Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
         int size = ctx.INTEGER().size();
         String tmp = this.getNextVar();
@@ -300,7 +304,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
         programBody = programBody + "\n;!!!!!\n" + output.render();
 
 		currentType = "vector";
-        return null;
+        return "vector";
     }
 
 
