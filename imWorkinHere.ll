@@ -165,7 +165,7 @@ define i32 @main(i32 %argc, i8** %argv) #0 {
   store i8** %argv, i8*** %2, align 8
   store i32 3, i32* %startRange, align 4
   store i32 7, i32* %endRange, align 4
-  %4 = load i32* %endRange, align 4
+  %4 = load i32* %endRange, align 4   ;
   %5 = add nsw i32 1, %4
   %6 = load i32* %startRange, align 4
   %7 = sub nsw i32 %5, %6

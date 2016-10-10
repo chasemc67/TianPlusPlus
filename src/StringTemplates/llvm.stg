@@ -99,16 +99,16 @@ define void @createRange(i32* %a, i32 %start, i32 %end) #0 {
   %7 = icmp sgt i32 %6, 0
   br i1 %7, label %8, label %12
 
-; <label>:8                                       ; preds = %0
+; \<label\>:8                                       ; preds = %0
   %9 = load i32* %3, align 4
   %10 = load i32* %2, align 4
   %11 = sub nsw i32 %9, %10
   br label %13
 
-; <label>:12                                      ; preds = %0
+; \<label\>:12                                      ; preds = %0
   br label %13
 
-; <label>:13                                      ; preds = %12, %8
+; \<label\>:13                                      ; preds = %12, %8
   %14 = phi i32 [ %11, %8 ], [ 0, %12 ]
   %15 = load i32** %1, align 8
   %16 = getelementptr inbounds i32* %15, i64 0
@@ -116,7 +116,7 @@ define void @createRange(i32* %a, i32 %start, i32 %end) #0 {
   store i32 1, i32* %i, align 4
   br label %17
 
-; <label>:17                                      ; preds = %32, %13
+; \<label\>:17                                      ; preds = %32, %13
   %18 = load i32* %i, align 4
   %19 = load i32* %3, align 4
   %20 = load i32* %2, align 4
@@ -124,7 +124,7 @@ define void @createRange(i32* %a, i32 %start, i32 %end) #0 {
   %22 = icmp sle i32 %18, %21
   br i1 %22, label %23, label %35
 
-; <label>:23                                      ; preds = %17
+; \<label\>:23                                      ; preds = %17
   %24 = load i32* %2, align 4
   %25 = load i32* %i, align 4
   %26 = sub nsw i32 %25, 1
@@ -136,13 +136,13 @@ define void @createRange(i32* %a, i32 %start, i32 %end) #0 {
   store i32 %27, i32* %31, align 4
   br label %32
 
-; <label>:32                                      ; preds = %23
+; \<label\>:32                                      ; preds = %23
   %33 = load i32* %i, align 4
   %34 = add nsw i32 %33, 1
   store i32 %34, i32* %i, align 4
   br label %17
 
-; <label>:35                                      ; preds = %17
+; \<label\>:35                                      ; preds = %17
   ret void
 }
 
@@ -185,19 +185,21 @@ declareVecVar(varName) ::= <<
 >>
 
 writeRangeToVar(leftVar, rightVar, resultVar, tempVar1, tempVar2, tempVar3, tempVar4, tempVar5, tempVar6, tempVar7, tempVar8, tempVar9, tempVar10) ::= <<
-%<tempVar6> = alloca i8*                                   ;writeRangeToVar
-%<tempVar1> = load i32* %<leftVar>, align 4
-%<tempVar2> = load i32* %<rightVar>, align 4
-%<tempVar10> = add nsw  i32 1, %<tempVar2>
-%<tempVar3> = sub nsw i32 %<tempVar1>, %<tempVar10>
-%<tempVar4> = zext i32 %<tempVar3> to i64
-%<resultVar> = alloca i32, i64 %<tempVar4>, align 16    ;allocating diff number of bytes
-%<tempVar5> = call i8* @llvm.stacksave()
-%<tempVar7> = load i32* %<leftVar>, align 4
-%<tempVar8> = load i32* %<rightVar>, align 4
-call void @createRange(i32* %<resultVar>, i32 %<tempVar7>, i32 %<tempVar8>)
-%<tempVar9> = load i8** %<tempVar6>
-call void @llvm.stackrestore(i8* %<tempVar9>)
+%<tempVar7> = alloca i8*
+%<tempVar1> = load i32* %<rightVar>
+%<tempVar2> = add nsw i32 1, %<tempVar1>
+%<tempVar3> = load i32* %<leftVar>
+%<tempVar4> = sub nsw i32 %5, %6
+%<tempVar5> = zext i32 %7 to i64
+%<resultVar> = alloca i32, i64 %<tempVar5>, align 16
+%<tempVar6> = call i8* @llvm.stacksave()
+store i8* %<tempVar6>, i8** %<tempVar7>
+%<tempVar8> = load i32* %leftVar, align 4
+%<tempVar9> = load i32* %rightVar, align 4
+call void @createRange(i32* %<resultVar>, i32 %<tempVar8>, i32 %<tempVar9>)
+; other stuff we can skip?
+%<tempVar10> = load i8** %<tempVar7>
+call void @llvm.stackrestore(i8* %<tempVar10>)
 >>
 
 allocateVecVar(varName, size) ::= <<
