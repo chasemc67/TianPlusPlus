@@ -78,7 +78,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
     @Override
     public Void visitDeclNoAsn(VCalcParser.DeclNoAsnContext ctx) {
-    	String userDefinedName = ctx.assignment().ID().getText();
+    	String userDefinedName = ctx.ID().getText();
 
         if (userVarCounter.containsKey(userDefinedName)){
             System.out.println("Var has already been defined");
