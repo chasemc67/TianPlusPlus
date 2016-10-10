@@ -8,8 +8,6 @@ target triple = "x86_64-pc-linux-gnu"
 @.str1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
 @.str2 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
 
-
-
 ; Function Attrs: nounwind uwtable
 define void @allocateVec(i32** %x, i32 %size) #0 {
   %1 = alloca i32**, align 8
