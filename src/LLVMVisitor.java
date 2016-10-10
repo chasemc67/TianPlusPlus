@@ -283,7 +283,16 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
         ST output = group.getInstanceOf("writeRangeToVar");
         ST output2 = output.add("leftVar", leftVar);
         ST output3 = output.add("rightVar", rightVar);
-
+        output.add("tempVar1", getNextVar());
+        output.add("tempVar2", getNextVar());
+        output.add("tempVar3", getNextVar());
+        output.add("tempVar4", getNextVar());
+        output.add("tempVar5", getNextVar());
+        output.add("tempVar6", getNextVar());
+        output.add("tempVar7", getNextVar());
+        output.add("tempVar8", getNextVar());
+        output.add("tempVar9", getNextVar());
+        output.add("tempVar10", getNextVar());
         ST outputf = output.add("resultVar", getNextVar());
 
         programBody = programBody + "\n" + output.render();
