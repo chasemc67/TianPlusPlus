@@ -147,7 +147,13 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
             ST output4 = output.add("resultVar", getNextVar());
             programBody = programBody + "\n" + output.render();
         } else  {
-            ST output = group.getInstanceOf("assignVectorToVar");
+			ST output = group.getInstanceOf("declareVecVar")
+					.add("varName", this.getNextVar());
+			programBody = programBody + "\n" + output.render();
+            output = group.getInstanceOf("swapVec")
+						.add("var1", getCurrentForUserVar(scope, userDefinedName))
+						.add("var2", getCurrentVar());
+			programBody = programBody + "\n" + output.render();
         }
         return type;
     }
