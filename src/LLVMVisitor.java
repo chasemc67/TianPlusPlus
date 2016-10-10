@@ -54,13 +54,12 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     	String userDefinedName = ctx.assignment().ID().getText();
 
 		if (ctx.type().getText().equals("int")) {
-            scope.addToScope(userDefinedName, getLLVMVarName(userDefinedName), "int");
-			userVarType.put(userDefinedName, "int");
+            scope.addToScope(userDefinedName, getLLVMVarName(scope, userDefinedName), "int");
 			ST output = group.getInstanceOf("declareIntVar");
 			ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
 			programBody = programBody + "\n" + output.render();
 		} else {
-			scope.addToScope(userDefinedName, getLLVMVarName(userDefinedName), "vector");
+			scope.addToScope(userDefinedName, getLLVMVarName(scope, userDefinedName), "vector");
 			ST output = group.getInstanceOf("declareVecVar")
 						.add("varName", getCurrentForUserVar(scope, userDefinedName));
 			programBody = programBody + "\n" + output.render();
@@ -80,12 +79,12 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
         userVarCounter.put(userDefinedName, 0);
 
         if (ctx.type().getText().equals("int")) {
-            scope.addToScope(userDefinedName, getLLVMVarName(userDefinedName), "int");
+            scope.addToScope(userDefinedName, getLLVMVarName(scope, userDefinedName), "int");
             ST output = group.getInstanceOf("declareIntVar");
             ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
             programBody = programBody + "\n" + output.render();
         } else {
-            scope.addToScope(userDefinedName, getLLVMVarName(userDefinedName), "vector");
+            scope.addToScope(userDefinedName, getLLVMVarName(scope, userDefinedName), "vector");
             ST output = group.getInstanceOf("declareVecVar")
                         .add("varName", getCurrentForUserVar(scope, userDefinedName));
             programBody = programBody + "\n" + output.render();
