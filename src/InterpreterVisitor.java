@@ -176,6 +176,14 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         Stuff right = visit(ctx.expr(1));
         Stuff value = null;
 
+        if (!left.type.equals(right.type)) {
+            if (left.type.equals("int")) {
+                left = promoteInteger(left, right);
+            } else {
+                right = promoteInteger(left, right);
+            }
+        }
+
         ArrayList<Integer> outputList;
 
         if (left.type.equals("int") && right.type.equals("int")){
@@ -222,6 +230,14 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         Stuff right = visit(ctx.expr(1));
         Stuff value = null;
 
+        if (!left.type.equals(right.type)) {
+            if (left.type.equals("int")) {
+                left = promoteInteger(left, right);
+            } else {
+                right = promoteInteger(left, right);
+            }
+        }
+
         ArrayList<Integer> outputList;
 
         if (left.type.equals("int") && right.type.equals("int")){
@@ -267,6 +283,14 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         Stuff left = visit(ctx.expr(0));
         Stuff right = visit(ctx.expr(1));
         Stuff value = null;
+
+        if (!left.type.equals(right.type)) {
+            if (left.type.equals("int")) {
+                left = promoteInteger(left, right);
+            } else {
+                right = promoteInteger(left, right);
+            }
+        }
 
         ArrayList<Integer> compareResult = new ArrayList<Integer>();
 
@@ -339,6 +363,14 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         Stuff left = visit(ctx.expr(0));
         Stuff right = visit(ctx.expr(1));
         Stuff value = null;
+
+        if (!left.type.equals(right.type)) {
+            if (left.type.equals("int")) {
+                left = promoteInteger(left, right);
+            } else {
+                right = promoteInteger(left, right);
+            }
+        }
 
         ArrayList<Integer> compareResult = new ArrayList<Integer>();
 
@@ -493,11 +525,32 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         } else {
             returnList = new ArrayList<Integer>();
             for (Integer indexVar : index.vectorValues) {
-                returnList.add(vector.vectorValues.get(indexVar));
+                if (indexVar >= vector.vectorValues.size()) {
+                    returnList.add(0);
+                } else {
+                    returnList.add(vector.vectorValues.get(indexVar));
+                }
             }
             returnValue = new Stuff(returnList);
         }
 
         return returnValue;
+    }
+
+    private Stuff promoteInteger(Stuff left, Stuff right) {
+        ArrayList<Integer> promotedVec = new ArrayList<Integer>();
+        if (left.type.equals("vector") && !right.type.equals("vector")) {
+            for (int i = 0; i < left.vectorValues.size(); i++){
+                promotedVec.add(right.intValue);
+            }
+            return new Stuff(promotedVec);
+        } else if (!left.type.equals("vector") && right.type.equals("vector")) {
+            for (int i = 0; i < right.vectorValues.size(); i++){
+                promotedVec.add(left.intValue);
+            }
+            return new Stuff(promotedVec);
+        }
+
+        return null;
     }
 }

@@ -37,3 +37,11 @@ g * f should be 8 im pretty sure, but im not sure about f*g
 
 
 on compares, what happens if the left hand side vector is smaller than the right hand side? I'm going to assume the output should be the size of the left hand vector
+
+
+Check this:
+in the pdf, it says:
+vector j = 0..3;
+print(j*2); -> [0 2 6 8]
+
+should be [0 2 4 6] right?
