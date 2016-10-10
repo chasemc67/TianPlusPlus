@@ -5,6 +5,79 @@ target triple = "x86_64-pc-linux-gnu"
 
 @.str = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
 
+; Function Attrs: nounwind ssp uwtable
+define void @allocateVec(i32**, i32) #0 {
+  %3 = alloca i32**, align 8
+  %4 = alloca i32, align 4
+  store i32** %0, i32*** %3, align 8
+  store i32 %1, i32* %4, align 4
+  %5 = load i32, i32* %4, align 4
+  %6 = add nsw i32 %5, 2
+  %7 = sext i32 %6 to i64
+  %8 = mul i64 %7, 4
+  %9 = call i8* @malloc(i64 %8)
+  %10 = bitcast i8* %9 to i32*
+  %11 = load i32**, i32*** %3, align 8
+  store i32* %10, i32** %11, align 8
+  %12 = load i32, i32* %4, align 4
+  %13 = load i32**, i32*** %3, align 8
+  %14 = getelementptr inbounds i32*, i32** %13, i64 0
+  %15 = load i32*, i32** %14, align 8
+  store i32 %12, i32* %15, align 4
+  ret void
+}
+
+; Function Attrs: nounwind ssp uwtable
+define void @printVec(i32*) #0 {
+  %2 = alloca i32*, align 8
+  %3 = alloca i32, align 4
+  store i32* %0, i32** %2, align 8
+  store i32 1, i32* %3, align 4
+  br label %4
+
+  %5 = load i32, i32* %3, align 4
+  %6 = load i32*, i32** %2, align 8
+  %7 = getelementptr inbounds i32, i32* %6, i64 0
+  %8 = load i32, i32* %7, align 4
+  %9 = add nsw i32 %8, 1
+  %10 = icmp slt i32 %5, %9
+  br i1 %10, label %11, label %21
+
+  %12 = load i32, i32* %3, align 4
+  %13 = sext i32 %12 to i64
+  %14 = load i32*, i32** %2, align 8
+  %15 = getelementptr inbounds i32, i32* %14, i64 %13
+  %16 = load i32, i32* %15, align 4
+  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str, i32 0, i32 0), i32 %16)
+  br label %18
+
+  %19 = load i32, i32* %3, align 4
+  %20 = add nsw i32 %19, 1
+  store i32 %20, i32* %3, align 4
+  br label %4
+
+  ret void
+}
+
+; Function Attrs: nounwind ssp uwtable
+define void @swapVec(i32**, i32**) #0 {
+  %3 = alloca i32**, align 8
+  %4 = alloca i32**, align 8
+  %5 = alloca i32*, align 8
+  store i32** %0, i32*** %3, align 8
+  store i32** %1, i32*** %4, align 8
+  %6 = load i32**, i32*** %3, align 8
+  %7 = load i32*, i32** %6, align 8
+  store i32* %7, i32** %5, align 8
+  %8 = load i32**, i32*** %4, align 8
+  %9 = load i32*, i32** %8, align 8
+  %10 = load i32**, i32*** %3, align 8
+  store i32* %9, i32** %10, align 8
+  %11 = load i32*, i32** %5, align 8
+  %12 = load i32**, i32*** %4, align 8
+  store i32* %11, i32** %12, align 8
+  ret void
+}
 >>
 
 main() ::= <<
@@ -28,6 +101,34 @@ declareIntVar(varName) ::= <<
 %<varName> = alloca i32, align 4
 >>
 
+declareVecVar(varName) ::= <<
+%<varName> = alloca i32*, align 8                               ;declare vector
+>>
+
+allocateVecVar(varName, size) ::= <<
+call void @allocateVec(i32* %<varName>, i32 <size>)             ;allocate vector
+>>
+
+swapVec(var1, var2) ::= <<
+call void @swapVec(i32** %<var1>, i32** %<var2>)                ;swap vector <var1> <var2>
+>>
+
+assignVecToVar(varName, len, size, tempVar1, tempVar2) ::= <<
+%<tempVar1> = call i8* @malloc(i64 <size>)
+%<tempVar2> = bitcast i8* %<tempVar1> to i32*
+store i32* %<tempVar2>, i32** %<varName>, align 8
+%<tempVar3> = load i32*, i32** %<varName>, align 8
+%<tempVar4> = getelementptr inbounds i32, i32* %<tempVar3>, i64 0
+store i32 <len>, i32* %<tempVar4>, align 4
+>>
+
+vecAssign(varName, index, payload, tempVar1, tempVar2) ::= <<
+%<tempVar1> = load i32*, i32** %<varName>, align 8                                      ;assign vector[<index>] = <payload>
+%<tempVar2> = getelementptr inbounds i32, i32* %<tempVar1>, i64 %<index>
+store i32 <payload>, i32* %<tempVar2>, align 4
+
+>>
+
 assignIntToVar(varName, assignResult, tempVar1) ::= <<
 %<tempVar1> = load i32* %<assignResult>, align 4
 store i32 %<tempVar1>, i32* %<varName>
@@ -35,6 +136,11 @@ store i32 %<tempVar1>, i32* %<varName>
 
 writeIntIdToVar(varName, resultVar) ::= <<
 store i32* %<varName>, i32* %<resultVar>
+>>
+
+printVec(varName, tempVar1) ::= <<
+%<tempVar1> = load i32*, i32** %<varName>, align 8
+call void @printVec(i32* %<tempVar1>)
 >>
 
 printIntFromStack(loaderVar, varNumberOfResult, newVarNumber) ::= <<
