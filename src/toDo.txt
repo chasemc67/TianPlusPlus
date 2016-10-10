@@ -34,3 +34,6 @@ if vector f is 2 long, and is 8 long,
 should f*g be 2? or 8.
 
 g * f should be 8 im pretty sure, but im not sure about f*g
+
+
+on compares, what happens if the left hand side vector is smaller than the right hand side? I'm going to assume the output should be the size of the left hand vector

@@ -268,6 +268,8 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         Stuff right = visit(ctx.expr(1));
         Stuff value = null;
 
+        ArrayList<Integer> compareResult = new ArrayList<Integer>();
+
         if (left.type.equals("int") && right.type.equals("int")){
             if (ctx.op.getType() == VCalcParser.LESS) {
                 if (left.intValue < right.intValue) {
@@ -282,9 +284,51 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
                     value = new Stuff(0);
                 }
             }
+        } else if (left.type.equals("vector") && right.type.equals("vector")){
+            if (ctx.op.getType() == VCalcParser.LESS) { 
+                for (int i = 0; i < Math.min(right.vectorValues.size(), left.vectorValues.size()); i++) {
+                    if (left.vectorValues.get(i) < right.vectorValues.get(i)) {
+                        compareResult.add(1);
+                    }
+                    else if (left.vectorValues.get(i) >= right.vectorValues.get(i)) {
+                        compareResult.add(0);
+                    }
+                }
+
+                if(left.vectorValues.size() > right.vectorValues.size()) {
+                    for (int i = right.vectorValues.size(); i < left.vectorValues.size(); i++) {
+                        if (left.vectorValues.get(i) < 0) {
+                            compareResult.add(1);
+                        } else {
+                            compareResult.add(0);
+                        }
+                    }
+                }
+            } else { //If we're checking for greater than
+                for (int i = 0; i < Math.min(right.vectorValues.size(), left.vectorValues.size()); i++) {
+                    if (left.vectorValues.get(i) > right.vectorValues.get(i)) {
+                        compareResult.add(1);
+                    }
+                    else if (left.vectorValues.get(i) <= right.vectorValues.get(i)) {
+                        compareResult.add(0);
+                    }
+                }
+
+                if(left.vectorValues.size() > right.vectorValues.size()) {
+                    for (int i = right.vectorValues.size(); i < left.vectorValues.size(); i++) {
+                        if (left.vectorValues.get(i) > 0) {
+                            compareResult.add(1);
+                        } else {
+                            compareResult.add(0);
+                        }
+                    }
+                }
+            }
+
+            value = new Stuff(compareResult);
+            
         } else {
-            // To Do
-            System.out.println("I can't handle this yet");
+            System.out.println("Type promotion hasn't been implemented yet");
         }
 
         return value;
@@ -295,6 +339,8 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         Stuff left = visit(ctx.expr(0));
         Stuff right = visit(ctx.expr(1));
         Stuff value = null;
+
+        ArrayList<Integer> compareResult = new ArrayList<Integer>();
 
         if (left.type.equals("int") && right.type.equals("int")){
             if (ctx.op.getType() == VCalcParser.EQUAL) {
@@ -310,9 +356,51 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
                     value = new Stuff(0);
                 }
             }
+        } else if (left.type.equals("vector") && right.type.equals("vector")) {
+            if (ctx.op.getType() == VCalcParser.EQUAL) { 
+                for (int i = 0; i < Math.min(right.vectorValues.size(), left.vectorValues.size()); i++) {
+                    if (left.vectorValues.get(i) == right.vectorValues.get(i)) {
+                        compareResult.add(1);
+                    }
+                    else if (left.vectorValues.get(i) != right.vectorValues.get(i)) {
+                        compareResult.add(0);
+                    }
+                }
+
+                if(left.vectorValues.size() > right.vectorValues.size()) {
+                    for (int i = right.vectorValues.size(); i < left.vectorValues.size(); i++) {
+                        if (left.vectorValues.get(i) == 0) {
+                            compareResult.add(1);
+                        } else {
+                            compareResult.add(0);
+                        }
+                    }
+                }
+            } else { //If we're checking for not equal here
+                for (int i = 0; i < Math.min(right.vectorValues.size(), left.vectorValues.size()); i++) {
+                    if (left.vectorValues.get(i) != right.vectorValues.get(i)) {
+                        compareResult.add(1);
+                    }
+                    else if (left.vectorValues.get(i) == right.vectorValues.get(i)) {
+                        compareResult.add(0);
+                    }
+                }
+
+                if(left.vectorValues.size() > right.vectorValues.size()) {
+                    for (int i = right.vectorValues.size(); i < left.vectorValues.size(); i++) {
+                        if (left.vectorValues.get(i) != 0) {
+                            compareResult.add(1);
+                        } else {
+                            compareResult.add(0);
+                        }
+                    }
+                }
+            }
+
+            value = new Stuff(compareResult);
+           
         } else {
-            // To Do
-            System.out.println("I can't handle this yet");
+             System.out.println("I can't type promotion yet");
         }
 
         return value;
