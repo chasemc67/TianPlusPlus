@@ -46,7 +46,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 		visitChildren(ctx);
 
 		//Compile final program and print
-		String output = beginProg + variableDeclarations + "\n" + initMain + programBody + exitProgram;
+		String output = beginProg + variableDeclarations + "\n" + initMain + programBody + "\n" + exitProgram;
 		System.out.println(output);
 		return null;
 	}
@@ -147,7 +147,8 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
         ST output = group.getInstanceOf("writeIntIdToVar");
         ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
-        ST output3 = output.add("resultVar", getNextVar());
+        ST output3 = output.add("tempVar1", getNextVar());
+        ST output4 = output.add("resultVar", getNextVar());
         programBody = programBody + "\n" + output.render();
         return null;
     }

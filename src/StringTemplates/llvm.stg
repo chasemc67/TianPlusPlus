@@ -105,10 +105,12 @@ store i32 <intValue>, i32* %<varNumber>
 >>
 
 declareIntVar(varName) ::= <<
+;declareIntVar
 %<varName> = alloca i32, align 4
 >>
 
 declareVecVar(varName) ::= <<
+;declareVecVar
 %<varName> = alloca i32*, align 8                               ;declare vector
 >>
 
@@ -137,12 +139,16 @@ store i32 <payload>, i32* %<tempVar2>, align 4
 >>
 
 assignIntToVar(varName, assignResult, tempVar1) ::= <<
+;assignIntoVar
 %<tempVar1> = load i32* %<assignResult>, align 4
 store i32 %<tempVar1>, i32* %<varName>
 >>
 
-writeIntIdToVar(varName, resultVar) ::= <<
-store i32* %<varName>, i32* %<resultVar>
+writeIntIdToVar(varName, tempVar1, resultVar) ::= <<
+;visitExprId(writeIntIdToVar)
+%<resultVar> = alloca i32, align 4
+%<tempVar1> = load i32* %<varName>, align 4
+store i32 %<tempVar1>, i32* %<resultVar>
 >>
 
 printVec(varName, tempVar1) ::= <<
