@@ -185,20 +185,20 @@ declareVecVar(varName) ::= <<
 >>
 
 writeRangeToVar(leftVar, rightVar, resultVar, tempVar1, tempVar2, tempVar3, tempVar4, tempVar5, tempVar6, tempVar7, tempVar8, tempVar9, tempVar10) ::= <<
-%<tempVar7> = alloca i8*
-%<tempVar1> = load i32* %<rightVar>
-%<tempVar2> = add nsw i32 1, %<tempVar1>
-%<tempVar3> = load i32* %<leftVar>
-%<tempVar4> = sub nsw i32 %<tempVar3>, %<tempVar2>
-%<tempVar5> = zext i32 %<tempVar4> to i64
-%<resultVar> = alloca i32, i64 %<tempVar5>, align 16
-%<tempVar6> = call i8* @llvm.stacksave()
-store i8* %<tempVar6>, i8** %<tempVar7>
+
+%<tempVar1> = alloca i8*
+%<tempVar2> = load i32* %<rightVar>, align 4   ;
+%<tempVar3> = add nsw i32 1, %<tempVar2>
+%<tempVar4> = load i32* %<leftVar>, align 4
+%<tempVar5> = sub nsw i32 %<tempVar3>, %<tempVar4>
+%<tempVar6> = zext i32 %<tempVar5> to i64
+%<resultVar> = alloca i32, i64 %<tempVar6>, align 16            ;the result
+%<tempVar7> = call i8* @llvm.stacksave()
+store i8* %<tempVar7>, i8** %<tempVar1>
 %<tempVar8> = load i32* %<leftVar>, align 4
 %<tempVar9> = load i32* %<rightVar>, align 4
 call void @createRange(i32* %<resultVar>, i32 %<tempVar8>, i32 %<tempVar9>)
-; other stuff we can skip?
-%<tempVar10> = load i8** %<tempVar7>
+%<tempVar10> = load i8** %<tempVar1>
 call void @llvm.stackrestore(i8* %<tempVar10>)
 >>
 
