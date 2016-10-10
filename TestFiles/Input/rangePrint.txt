@@ -6,7 +6,7 @@ print(v);
 vector w = f-g .. f+g;
 print(w);
 
-print(g .. f+5);
+print(g .. (f+5));
 
 w = [];
 print(w);
