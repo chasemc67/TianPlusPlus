@@ -115,7 +115,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
             ST output = group.getInstanceOf("swapVec")
                     .add("var1", this.getCurrentForUserVar(scope, userDefinedName))
                     .add("var2", exprResult);
-            programBody = programBody + "\n" + output.render();
+            programBody = programBody + "\n ;-------- \n" + output.render();
             currentType = "vector";
 		}
     	return null;
@@ -136,7 +136,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
         } else {
             ST output = group.getInstanceOf("printVec")
                         .add("varName", this.getCurrentVar())
-                        .add("temp1", this.getNextVar());
+                        .add("tempVar1", this.getNextVar());
             programBody = programBody + "\n" + output.render();
         }
 	    return null;
@@ -272,8 +272,9 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     public Void visitExprVec(VCalcParser.ExprVecContext ctx) {
 //        Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
         int size = ctx.INTEGER().size();
-        ST output = group.getInstanceOf("decVecVar")
-                    .add("varName", this.getNextVar());
+        String tmp = this.getNextVar();
+        ST output = group.getInstanceOf("declareVecVar")
+                    .add("varName", tmp);
         programBody = programBody + "\n" + output.render();
 
         String thisVector = this.getCurrentVar();
@@ -289,20 +290,21 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
                     .add("varName", thisVector)
                     .add("index", i+1)
                     .add("payload", num)
-                    .add("tempvar1", this.getNextVar())
-                    .add("tempvar2", this.getNextVar());
+                    .add("tempVar1", this.getNextVar())
+                    .add("tempVar2", this.getNextVar());
             programBody = programBody + "\n" + output.render();
         }
 
 
-        output = group.getInstanceOf("decVecVar")
+        output = group.getInstanceOf("declareVecVar")
                 .add("varName", this.getNextVar());
         programBody = programBody + "\n" + output.render();
         output = group.getInstanceOf("swapVec")
-                .add("var1", this.getCurrentVar())
-                .add("var2", this.getNextVar());
-        programBody = programBody + "\n" + output.render();
+                .add("var1", thisVector)
+                .add("var2", this.getCurrentVar());
+        programBody = programBody + "\n;!!!!!\n" + output.render();
 
+		currentType = "vector";
         return null;
     }
 
