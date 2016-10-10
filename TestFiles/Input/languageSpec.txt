@@ -19,7 +19,6 @@ int k = 3;
 print(i); 
 print(i[j]);
 print(j*2);
-print(j); 
 print(i[j*2]);
 print(i[k]);
 
