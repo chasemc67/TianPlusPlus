@@ -1,2 +1,4 @@
 vector v = [ 0 1 2];
 print(v);
+int i = 10;
+print(i);

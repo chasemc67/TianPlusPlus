@@ -64,8 +64,6 @@ define void @printVec(i32* %x) #0 {
   ret void
 }
 
-declare i32 @printf(i8*, ...) #2
-
 ; Function Attrs: nounwind uwtable
 define void @swapVec(i32** %x, i32** %y) #0 {
   %1 = alloca i32**, align 8
@@ -85,6 +83,57 @@ define void @swapVec(i32** %x, i32** %y) #0 {
   store i32* %8, i32** %9, align 8
   ret void
 }
+
+; Function Attrs: nounwind uwtable
+define void @createRange(i32* %a, i32 %start, i32 %end) #0 {
+  %1 = alloca i32*, align 8
+  %2 = alloca i32, align 4
+  %3 = alloca i32, align 4
+  %i = alloca i32, align 4
+  store i32* %a, i32** %1, align 8
+  store i32 %start, i32* %2, align 4
+  store i32 %end, i32* %3, align 4
+  store i32 0, i32* %i, align 4
+  br label %4
+
+:4                                       ; preds = %18, %0
+  %5 = load i32* %i, align 4
+  %6 = load i32* %3, align 4
+  %7 = load i32* %2, align 4
+  %8 = sub nsw i32 %6, %7
+  %9 = icmp slt i32 %5, %8
+  br i1 %9, label %10, label %21
+
+:10                                      ; preds = %4
+  %11 = load i32* %2, align 4
+  %12 = load i32* %i, align 4
+  %13 = add nsw i32 %11, %12
+  %14 = load i32* %i, align 4
+  %15 = sext i32 %14 to i64
+  %16 = load i32** %1, align 8
+  %17 = getelementptr inbounds i32* %16, i64 %15
+  store i32 %13, i32* %17, align 4
+  br label %18
+
+:18                                      ; preds = %10
+  %19 = load i32* %i, align 4
+  %20 = add nsw i32 %19, 1
+  store i32 %20, i32* %i, align 4
+  br label %4
+
+:21                                      ; preds = %4
+  ret void
+}
+
+
+; Function Attrs: nounwind
+declare i8* @llvm.stacksave() #1
+
+declare i32 @printf(i8*, ...) #2
+
+; Function Attrs: nounwind
+declare void @llvm.stackrestore(i8*) #1
+
 >>
 
 main() ::= <<

@@ -190,7 +190,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
     	ST output7 = output.add("resultVar", getNextVar());
 
     	programBody = programBody + "\n" + output.render();
-    	return null;
+    	return "int";
     }
 
 
@@ -216,7 +216,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
     	ST output7 = output.add("resultVar", getNextVar());
 
     	programBody = programBody + "\n" + output.render();
-    	return null;
+    	return "int";
     }
 
     @Override
@@ -242,7 +242,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 		ST output8 = output.add("resultVar", getNextVar());
 
 		programBody = programBody + "\n" + output.render();
-		return null;
+		return "int";
 	}
 
 
@@ -270,8 +270,25 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 		ST output8 = output.add("resultVar", getNextVar());
 
 		programBody = programBody + "\n" + output.render();
-		return null;
+		return "int";
 	}
+
+    @Override 
+    public String visitExprRange(VCalcParser.ExprRangeContext ctx) { 
+        visit(ctx.expr(0));
+        String leftVar = this.getCurrentVar();
+        visit(ctx.expr(1));
+        String rightVar = this.getCurrentVar();
+
+        ST output = group.getInstanceOf("writeRangeToVar");
+        ST output2 = output.add("leftVar", leftVar);
+        ST output3 = output.add("rightVar", rightVar);
+
+        ST outputf = output.add("resultVar", getNextVar());
+
+        programBody = programBody + "\n" + output.render();
+        return "vector";
+    }
 
 	@Override
     public String visitExprVec(VCalcParser.ExprVecContext ctx) {
