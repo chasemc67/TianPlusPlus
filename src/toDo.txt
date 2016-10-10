@@ -15,13 +15,13 @@ Needs to accomodate integers and vectors of integers
 
 [+] Add vector math functions (vector + vector, vector * vector, etc)
 
-[ ] Add vector compares (>/<. ==/!==)
+[+] Add vector compares (>/<. ==/!==)
 
-[ ] Add type promotion math functions (vector + int, vector * int, etc)
+[+] Add type promotion math functions (vector + int, vector * int, etc)
 
-[ ] Add scoping code
+[+] Add scoping code
 
-[ ] Add type checking / type promotion / type safety code
+[+] Add type checking / type promotion / type safety code
 
 [+] Get basic LLVM print integer working
 

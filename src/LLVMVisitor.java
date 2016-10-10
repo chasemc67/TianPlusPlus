@@ -60,7 +60,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     	}
     	userVarCounter.put(userDefinedName, 0);
 
-		if (ctx.type().equals("int")) {
+		if (ctx.type().getText().equals("int")) {
 			userVarType.put(userDefinedName, "int");
 			ST output = group.getInstanceOf("declareIntVar");
 			ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
@@ -104,7 +104,6 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     	String userDefinedName = ctx.ID().getText();
     	visit(ctx.expr());
     	String exprResult = getCurrentVar();
-
 		if (userVarType.get(userDefinedName).equals("int")) {
 			ST output = group.getInstanceOf("assignIntToVar");
 			ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
