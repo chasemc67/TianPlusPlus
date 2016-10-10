@@ -1,7 +1,10 @@
 vector i = 1..5;
 print(i);
-i = 1 + 1 .. 2 + 2;
+i = (1 + 1) .. (2 + 2);
 print(i);
 vector j = 1..5;
 vector k = 1..6;
 print(j+k);
+print( [i in 1..5 | i][[i in 0..4 | i]]);
+print( 1..5 [ [i in 0..4 | i] ]);
+print( [i in 1..5 | i][ 1..2 ]);

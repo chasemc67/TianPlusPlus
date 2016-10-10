@@ -1,5 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stringtemplate.v4.*;
 
 public class LLVMVisitor extends VCalcBaseVisitor<Void> {
@@ -8,7 +10,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 	Integer scopeCounter = 0;
 
 	STGroup group = new STGroupFile("./src/StringTemplates/llvm.stg");
-	
+
 	// The starting boilerplate for the assembly program
 	ST st = group.getInstanceOf("prog");
 	String beginProg = st.render();
@@ -29,11 +31,15 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 
 	// main uses 3 of these right off the bat
 	Integer varCounter = 3;
-	
+
 	Map<String, Integer> userVarCounter = new HashMap<String, Integer>();
 
+	Map<String, String> userVarType = new HashMap<String, String>();
 
-	@Override 
+    String currentType = "int";
+
+
+	@Override
 	public Void visitProg(VCalcParser.ProgContext ctx) {
 		// Have the children all write their subroutines to the program
 		// body and variable declarations
@@ -54,9 +60,18 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     	}
     	userVarCounter.put(userDefinedName, 0);
 
-    	ST output = group.getInstanceOf("declareIntVar");
-    	ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
-    	programBody = programBody + "\n" + output.render();
+		if (ctx.type().equals("int")) {
+			userVarType.put(userDefinedName, "int");
+			ST output = group.getInstanceOf("declareIntVar");
+			ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
+			programBody = programBody + "\n" + output.render();
+		} else {
+			userVarType.put(userDefinedName, "vector");
+			ST output = group.getInstanceOf("declareVecVar")
+						.add("varName", getCurrentForUserVar(scope, userDefinedName));
+			programBody = programBody + "\n" + output.render();
+		}
+
     	visit(ctx.assignment());
     	return null;
     }
@@ -69,10 +84,18 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     		System.out.println("Var has already been defined");
     	}
     	userVarCounter.put(userDefinedName, 0);
+        if (ctx.type().equals("int")) {
+            userVarType.put(userDefinedName, "int");
+            ST output = group.getInstanceOf("declareIntVar");
+            ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
+            programBody = programBody + "\n" + output.render();
+        } else {
+            userVarType.put(userDefinedName, "vector");
+            ST output = group.getInstanceOf("declareVecVar")
+                        .add("varName", getCurrentForUserVar(scope, userDefinedName));
+            programBody = programBody + "\n" + output.render();
+        }
 
-    	ST output = group.getInstanceOf("declareIntVar");
-    	ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
-    	programBody = programBody + "\n" + output.render();
     	return null;
     }
 
@@ -81,26 +104,41 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
     	String userDefinedName = ctx.ID().getText();
     	visit(ctx.expr());
     	String exprResult = getCurrentVar();
-    	ST output = group.getInstanceOf("assignIntToVar");
-    	ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
-    	ST output3 = output.add("assignResult", exprResult);
-    	ST output4 = output.add("tempVar1", getNextVar());
-    	programBody = programBody + "\n" + output.render();
+
+		if (userVarType.get(userDefinedName).equals("int")) {
+			ST output = group.getInstanceOf("assignIntToVar");
+			ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
+			ST output3 = output.add("assignResult", exprResult);
+			ST output4 = output.add("tempVar1", getNextVar());
+			programBody = programBody + "\n" + output.render();
+		} else {
+            ST output = group.getInstanceOf("swapVec")
+                    .add("var1", this.getCurrentForUserVar(scope, userDefinedName))
+                    .add("var2", exprResult);
+            programBody = programBody + "\n ;-------- \n" + output.render();
+            currentType = "vector";
+		}
     	return null;
     }
 
 	@Override
 	public Void visitPrint(VCalcParser.PrintContext ctx) {
-	    // Get the value that we'll be printint out onto the stack 
+
+	    // Get the value that we'll be printint out onto the stack
 	    visit(ctx.expr());
 
-	    // Will need to add some check here for whether we're
-	    // printing an int or vec
-	    ST output = group.getInstanceOf("printIntFromStack");
-	    ST output2 = output.add("varNumberOfResult", this.getCurrentVar());
-	    ST output3 = output.add("newVarNumber", this.getNextVar());
-	    ST output4 = output.add("loaderVar", this.getNextVar());
-	    programBody = programBody + "\n" + output.render();
+        if (currentType.equals("int")) {
+            ST output = group.getInstanceOf("printIntFromStack");
+            ST output2 = output.add("varNumberOfResult", this.getCurrentVar());
+            ST output3 = output.add("newVarNumber", this.getNextVar());
+            ST output4 = output.add("loaderVar", this.getNextVar());
+            programBody = programBody + "\n" + output.render();
+        } else {
+            ST output = group.getInstanceOf("printVec")
+                        .add("varName", this.getCurrentVar())
+                        .add("tempVar1", this.getNextVar());
+            programBody = programBody + "\n" + output.render();
+        }
 	    return null;
 	}
 
@@ -229,6 +267,46 @@ public class LLVMVisitor extends VCalcBaseVisitor<Void> {
 		programBody = programBody + "\n" + output.render();
 		return null;
 	}
+
+	@Override
+    public Void visitExprVec(VCalcParser.ExprVecContext ctx) {
+//        Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
+        int size = ctx.INTEGER().size();
+        String tmp = this.getNextVar();
+        ST output = group.getInstanceOf("declareVecVar")
+                    .add("varName", tmp);
+        programBody = programBody + "\n" + output.render();
+
+        String thisVector = this.getCurrentVar();
+
+        output = group.getInstanceOf("allocateVecVar")
+                 .add("varName", thisVector)
+                 .add("size", size);
+        programBody = programBody + "\n" + output.render();
+
+        for (int i = 0; i < size; i++) {
+            String num = ctx.INTEGER(i).getText();
+            output = group.getInstanceOf("vecAssign")
+                    .add("varName", thisVector)
+                    .add("index", i+1)
+                    .add("payload", num)
+                    .add("tempVar1", this.getNextVar())
+                    .add("tempVar2", this.getNextVar());
+            programBody = programBody + "\n" + output.render();
+        }
+
+
+        output = group.getInstanceOf("declareVecVar")
+                .add("varName", this.getNextVar());
+        programBody = programBody + "\n" + output.render();
+        output = group.getInstanceOf("swapVec")
+                .add("var1", thisVector)
+                .add("var2", this.getCurrentVar());
+        programBody = programBody + "\n;!!!!!\n" + output.render();
+
+		currentType = "vector";
+        return null;
+    }
 
 
     private String getCurrentVar() {

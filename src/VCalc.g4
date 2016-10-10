@@ -14,37 +14,24 @@ declaration: type assignment    #declAsn
 
 assignment: ID '=' expr;
 
-range: intExpr '..' intExpr;
 
 conditional: STARTIF '(' expr ')' statement+ ENDIF;
 loop: STARTLOOP '(' expr ')' statement+ ENDLOOP;
 print: PRINT '(' expr ')';
 
-intExpr: ID                                 #intExprId
-   | INTEGER                                #intExprInt
-   |  vecIndex                              #intVecIndex
-   | '(' intExpr ')'                        #intExprBrac
-   |  intExpr op=(MUL|DIV) intExpr          #intExprMulDiv
-   |  intExpr op=(ADD|SUB) intExpr          #intExprAddSub
-   |  intExpr op=(GREAT|LESS) intExpr       #intExprGreatLess
-   |  intExpr op=(EQUAL|NOTEQUAL) intExpr   #intExprEqual
-   ;
-
-expr: range                              #exprRange
-    |  generator                         #exprGen
-    |  filter                            #exprFil
-    |  vecIndex                          #exprVecIndex
-    |  ID                                #exprId
-    | INTEGER                            #exprInt
+expr: generator                          #exprGen
+    | filter                             #exprFil
+    | expr '..' expr                     #exprRange
     | '[' (INTEGER)* ']'                 #exprVec
+    | expr '[' expr ']'                  #exprIndex
+    | expr op=(MUL|DIV) expr             #exprMulDiv
+    | expr op=(ADD|SUB) expr             #exprAddSub
+    | expr op=(GREAT|LESS) expr          #exprGreatLess
+    | expr op=(EQUAL|NOTEQUAL) expr      #exprEqual
+    | ID                                 #exprId
+    | INTEGER                            #exprInt
     | '(' expr ')'                       #exprBrac
-    |  expr op=(MUL|DIV) expr            #exprMulDiv
-    |  expr op=(ADD|SUB) expr            #exprAddSub
-    |  expr op=(GREAT|LESS) expr         #exprGreatLess
-    |  expr op=(EQUAL|NOTEQUAL) expr     #exprEqual
     ;
-
-vecIndex: ID '[' expr ']';
 
 generator: '[' ID 'in' expr '|' expr ']';
 filter: '[' ID 'in' expr '&' expr ']';
