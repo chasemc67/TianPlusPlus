@@ -1330,6 +1330,27 @@ endIf(label2) ::= <<
 ; \<label>:%<label2> ;endIf
 >>
 
+
+initLoop(label1) ::= <<
+    br label %<label1>
+
+<label1>: ;start loop
+>>
+
+startLoop(loopVar, label2, label3, tempVar1, tempVar2) ::= <<
+    %<tempVar1> = load i32* %<loopVar>, align 4
+    %<tempVar2> = icmp ne i32 %<tempVar1>, 0
+    br i1 %<tempVar2>, label %<label2>, label %<label3>
+
+<label2>: ;star loop statements
+>>
+
+endLoop(label1, label3) ::= <<
+    br label %<label1>
+
+<label3>: ;end loop
+>>
+
 promoteInt(intVar, vectorVar, resultVar, tempVar1, tempVar2, tempVar3, tempVar4) ::= <<
 ; promoteInt
 %<tempVar2> = load i32** %<vectorVar>, align 8

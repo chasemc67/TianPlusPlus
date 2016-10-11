@@ -107,9 +107,7 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
     @Override
     public Stuff visitLoop(VCalcParser.LoopContext ctx) {
 
-        scope = new Scope(scope);
         Stuff value = visit(ctx.expr());
-        scope = scope.getParent();
 
         Stuff returnValue;
         while (value.intValue != 0) {
