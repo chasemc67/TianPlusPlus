@@ -2,3 +2,4 @@ int i = 5;
 int j = 10;
 print(i);
 print(j);
+print(i + j);
