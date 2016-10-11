@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 void allocateVec(int **x,int size) {
-	*x = (int *) malloc((size+1) * sizeof(int));
+	*x = (int *) malloc((size*2) * sizeof(int));
     *x[0] = size;
 }
 
@@ -167,27 +167,24 @@ void getVectorAtVector(int * newVector, int * vector, int * index) {
 
 int main(int argc, char *argv[])
 {
-    /*int *x;
-    allocateVec(&x,3);
-    x[1] = 4;
-    x[2] = 2;
-    x[3] = 1;
+    int j[4];
+    j[0] = 3;
+    j[1] = 1;
+    j[2] = 3;
+    j[3] = 5;
+
+    int * x;
+    allocateVec(&x, 12);
+
+    for (int i = 1; i < 13; i++ ){
+        x[i] = i+9;
+    }
+
+    printVec(j);
     printVec(x);
-    int *y;
-    allocateVec(&y,3);
-    y[1] = 9;
-    y[2] = 8;
-    y[3] = 7;
-    printVec(y);
-    swapVec(&x, &y);
-    printVec(x);
-    printVec(y);
-printf("44524353");*/
-    int  a = 1;
-    int b = 5;
-	int *vec;
-    int size = b - a + 1;
-    allocateVec(&vec,size);
-	makeRange(vec,1,5);
-	printVec(vec);
+
+    int *v;
+    allocateVec(&v, 12);
+    getVectorAtVector(v, x, j);
+    printVec(v);
 }

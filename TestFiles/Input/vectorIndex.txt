@@ -3,4 +3,7 @@ vector j = [1 3 5];
 vector x = 10 .. 21;
 
 print(x);
-print(j[10]);
+print(x[i]);
+print(x[j]);
+print(x[3]);
+

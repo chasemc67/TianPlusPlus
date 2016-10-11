@@ -14,7 +14,7 @@ define void @allocateVec(i32** %x, i32 %size) #0 {
   store i32** %x, i32*** %1, align 8
   store i32 %size, i32* %2, align 4
   %3 = load i32* %2, align 4
-  %4 = add nsw i32 %3, 1
+  %4 = mul nsw i32 %3, 2
   %5 = sext i32 %4 to i64
   %6 = mul i64 %5, 4
   %7 = call noalias i8* @malloc(i64 %6) #3
