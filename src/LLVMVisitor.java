@@ -287,12 +287,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
         output.add("tempVar2", getNextVar());
         output.add("tempVar3", getNextVar());
         output.add("tempVar4", getNextVar());
-        output.add("tempVar5", getNextVar());
-        output.add("tempVar6", getNextVar());
-        output.add("tempVar7", getNextVar());
-        output.add("tempVar8", getNextVar());
-        output.add("tempVar9", getNextVar());
-        output.add("tempVar10", getNextVar());
+		output.add("tempVar5", getNextVar());
         ST outputf = output.add("resultVar", getNextVar());
 
         programBody = programBody + "\n" + output.render();

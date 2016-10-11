@@ -85,16 +85,17 @@ define void @swapVec(i32** %x, i32** %y) #0 {
 }
 
 ; Function Attrs: nounwind uwtable
-define void @createRange(i32* %a, i32 %start, i32 %end) #0 {
+define void @makeRange(i32* %x, i32 %a, i32 %b) #0 {
   %1 = alloca i32*, align 8
   %2 = alloca i32, align 4
   %3 = alloca i32, align 4
+  %size = alloca i32, align 4
   %i = alloca i32, align 4
-  store i32* %a, i32** %1, align 8
-  store i32 %start, i32* %2, align 4
-  store i32 %end, i32* %3, align 4
+  store i32* %x, i32** %1, align 8
+  store i32 %a, i32* %2, align 4
+  store i32 %b, i32* %3, align 4
   %4 = load i32* %3, align 4
-  %5 = add nsw i32 1, %4
+  %5 = add nsw i32 %4, 1
   %6 = load i32* %2, align 4
   %7 = sub nsw i32 %5, %6
   %8 = icmp sgt i32 %7, 0
@@ -102,7 +103,7 @@ define void @createRange(i32* %a, i32 %start, i32 %end) #0 {
 
 ; \<label\>:9                                       ; preds = %0
   %10 = load i32* %3, align 4
-  %11 = add nsw i32 1, %10
+  %11 = add nsw i32 %10, 1
   %12 = load i32* %2, align 4
   %13 = sub nsw i32 %11, %12
   br label %15
@@ -112,40 +113,35 @@ define void @createRange(i32* %a, i32 %start, i32 %end) #0 {
 
 ; \<label\>:15                                      ; preds = %14, %9
   %16 = phi i32 [ %13, %9 ], [ 0, %14 ]
-  %17 = load i32** %1, align 8
-  %18 = getelementptr inbounds i32* %17, i64 0
-  store i32 %16, i32* %18, align 4
+  store i32 %16, i32* %size, align 4
   store i32 1, i32* %i, align 4
-  br label %19
+  br label %17
 
-; \<label\>:19                                      ; preds = %35, %15
-  %20 = load i32* %i, align 4
-  %21 = load i32* %3, align 4
-  %22 = add nsw i32 1, %21
-  %23 = load i32* %2, align 4
-  %24 = sub nsw i32 %22, %23
-  %25 = icmp sle i32 %20, %24
-  br i1 %25, label %26, label %38
+; \<label\>:17                                      ; preds = %30, %15
+  %18 = load i32* %i, align 4
+  %19 = load i32* %size, align 4
+  %20 = icmp sle i32 %18, %19
+  br i1 %20, label %21, label %33
 
-; \<label\>:26                                      ; preds = %19
-  %27 = load i32* %2, align 4
-  %28 = load i32* %i, align 4
-  %29 = sub nsw i32 %28, 1
-  %30 = add nsw i32 %27, %29
+; \<label\>:21                                      ; preds = %17
+  %22 = load i32* %2, align 4
+  %23 = load i32* %i, align 4
+  %24 = add nsw i32 %22, %23
+  %25 = sub nsw i32 %24, 1
+  %26 = load i32* %i, align 4
+  %27 = sext i32 %26 to i64
+  %28 = load i32** %1, align 8
+  %29 = getelementptr inbounds i32* %28, i64 %27
+  store i32 %25, i32* %29, align 4
+  br label %30
+
+; \<label\>:30                                      ; preds = %21
   %31 = load i32* %i, align 4
-  %32 = sext i32 %31 to i64
-  %33 = load i32** %1, align 8
-  %34 = getelementptr inbounds i32* %33, i64 %32
-  store i32 %30, i32* %34, align 4
-  br label %35
+  %32 = add nsw i32 %31, 1
+  store i32 %32, i32* %i, align 4
+  br label %17
 
-; \<label\>:35                                      ; preds = %26
-  %36 = load i32* %i, align 4
-  %37 = add nsw i32 %36, 1
-  store i32 %37, i32* %i, align 4
-  br label %19
-
-; \<label\>:38                                      ; preds = %19
+; \<label\>:33                                      ; preds = %17
   ret void
 }
 
@@ -186,22 +182,16 @@ declareVecVar(varName) ::= <<
 %<varName> = alloca i32*, align 8                               ;declare vector
 >>
 
-writeRangeToVar(leftVar, rightVar, resultVar, tempVar1, tempVar2, tempVar3, tempVar4, tempVar5, tempVar6, tempVar7, tempVar8, tempVar9, tempVar10) ::= <<
+writeRangeToVar(leftVar, rightVar, resultVar, tempVar1, tempVar2, tempVar3, tempVar4, tempVar5) ::= <<
+<declareVecVar(resultVar)>
+%<tempVar1> =  load i32* %<leftVar>, align 4
+%<tempVar2> =  load i32* %<rightVar>, align 4
+%<tempVar3> =  sub nsw i32 %<tempVar2>, %<tempVar1>
+%<tempVar4> = add nsw i32 %<tempVar3>, 1
+call void @allocateVec(i32** %<resultVar>, i32 %<tempVar4>)            ;allocate vector
+%<tempVar5> = load i32** %<resultVar>, align 8
+call void @makeRange(i32* %<tempVar5>, i32 %<tempVar1>, i32 %<tempVar2>)
 
-%<tempVar1> = alloca i8*
-%<tempVar2> = load i32* %<rightVar>, align 4   ;
-%<tempVar3> = add nsw i32 1, %<tempVar2>
-%<tempVar4> = load i32* %<leftVar>, align 4
-%<tempVar5> = sub nsw i32 %<tempVar3>, %<tempVar4>
-%<tempVar6> = zext i32 %<tempVar5> to i64
-%<resultVar> = alloca i32, i64 %<tempVar6>, align 16            ;the result
-%<tempVar7> = call i8* @llvm.stacksave()
-store i8* %<tempVar7>, i8** %<tempVar1>
-%<tempVar8> = load i32* %<leftVar>, align 4
-%<tempVar9> = load i32* %<rightVar>, align 4
-call void @createRange(i32* %<resultVar>, i32 %<tempVar8>, i32 %<tempVar9>)
-%<tempVar10> = load i8** %<tempVar1>
-call void @llvm.stackrestore(i8* %<tempVar10>)
 >>
 
 allocateVecVar(varName, size) ::= <<
@@ -209,7 +199,7 @@ call void @allocateVec(i32** %<varName>, i32 <size>)             ;allocate vecto
 >>
 
 swapVec(var1, var2) ::= <<
-call void @swapVec(i32** %<var1>, i32** %<var2>)                ;swap vector <var1> <var2>
+call void @swapVec(i32** %<var1>, i32** %<var2>) ;swap vector <var1> <var2>
 >>
 
 assignVecToVar(varName, len, size, tempVar1, tempVar2) ::= <<
