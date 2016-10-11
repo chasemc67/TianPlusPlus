@@ -1392,13 +1392,13 @@ startIf(ifVar, label1, label2, tempVar1, tempVar2) ::= <<
     %<tempVar2> = icmp ne i32 %<tempVar1>, 0
     br i1 %<tempVar2>, label %<label1>, label %<label2>
 
-; \<label>:%<label1> ;startIf
+<label1>: ;startIf
 >>
 
 endIf(label2) ::= <<
     br label %<label2>
 
-; \<label>:%<label2> ;endIf
+<label2>: ;endIf
 >>
 
 
