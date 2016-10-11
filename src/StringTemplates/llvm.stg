@@ -1436,8 +1436,8 @@ call void @setVectorToInt(i32* %<tempVar3>, i32 %<tempVar4>)
 
 indexVectorWithInt(vector, index, resultVar, tempVar1, tempVar2, tempVar3) ::= <<
 ; indexWithInt
-%<tempVar2> = load i32** %<vector>, align 8
-%<tempVar3> = load i32* %<index>, align 4
+%<tempVar1> = load i32** %<vector>, align 8
+%<tempVar2> = load i32* %<index>, align 4
 %<resultVar> = alloca i32, align 4
 %<tempVar1> = call i32 @getVectorAtInt(i32* %<tempVar2>, i32 %<tempVar3>)
 store i32 %<tempVar1>, i32* %<resultVar>

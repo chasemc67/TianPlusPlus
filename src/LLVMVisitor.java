@@ -152,7 +152,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
             ST output3 = output.add("tempVar1", getNextVar());
             ST output4 = output.add("resultVar", getNextVar());
             programBody = programBody + "\n" + output.render();
-        } else  {
+        } else {
 			ST output = group.getInstanceOf("declareVecVar")
 					.add("varName", this.getNextVar());
 			programBody = programBody + "\n" + output.render();
@@ -559,7 +559,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
             output.add("tempVar2", getNextVar());
             output.add("tempVar3", getNextVar());
             output.add("resultVar", getNextVar());
-            programBody = programBody + "\n" + output.render();
+            programBody = programBody + "\n ; ++++++++++ " + output.render();
             return "int";
         } else {
             ST output = group.getInstanceOf("indexVectorWithVector");
