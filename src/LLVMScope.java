@@ -62,8 +62,14 @@ public class LLVMScope {
         return tmp.type;
     }
 
-    public int getScopeNumber() {
-        return scopeNumber;
+    public Integer getScopeNumber(String name) {
+        if(inCurrentScope(name)) {
+            return scopeNumber;
+        }
+        if ( parent != null) {
+            return parent.getScopeNumber(name);
+        }
+        return null;
     }
 
     public Integer getVarCounter(String name) {
