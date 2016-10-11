@@ -156,7 +156,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 			ST output = group.getInstanceOf("declareVecVar")
 					.add("varName", this.getNextVar());
 			programBody = programBody + "\n" + output.render();
-            output = group.getInstanceOf("swapVec")
+            output = group.getInstanceOf("copyVec")
 						.add("var1", getCurrentForUserVar(scope, userDefinedName))
 						.add("var2", getCurrentVar());
 			programBody = programBody + "\n" + output.render();
@@ -436,7 +436,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
         return "vector";
     }
 
-	@Override
+    @Override
     public String visitExprVec(VCalcParser.ExprVecContext ctx) {
 //        Integer intValue = Integer.valueOf(ctx.INTEGER().getText());
         int size = ctx.INTEGER().size();
@@ -476,6 +476,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
         return "vector";
     }
 
+    @Override
     public String visitConditional(VCalcParser.ConditionalContext ctx) {
         visit(ctx.expr());
         String ifVar = this.getCurrentVar();
@@ -507,6 +508,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
         return null;
     }
 
+    @Override
     public String visitLoop(VCalcParser.LoopContext ctx) {
         String label1 = getNextVar();
 
@@ -545,6 +547,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
         return null;
     }
 
+    @Override
     public String visitExprIndex(VCalcParser.ExprIndexContext ctx) {
         visit(ctx.expr(0));
         String vecToIndex = getCurrentVar();
@@ -573,8 +576,83 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
             programBody = programBody + "\n" + output.render();
             return "vector";
         }
-    }    
+    }
 
+
+    public String visitGenerator(VCalcParser.GeneratorContext ctx) {
+        String userDefinedName = ctx.ID().getText();
+        String type = visit(ctx.expr(0));
+        String loopVec = getCurrentVar();
+
+        if (!userVarCounter.containsKey(userDefinedName)){
+            userVarCounter.put(userDefinedName, 0);
+
+        }
+
+        String label1 = getNextVar();
+        String label2 = getNextVar();
+        String label3 = getNextVar();
+        String label4 = getNextVar();
+        String iter = getNextVar();
+        String assignVec = getNextVar();
+
+        scope = new LLVMScope(scope);
+
+        scope.addToScope(userDefinedName, getLLVMVarName(scope, userDefinedName), "int");
+        ST output = group.getInstanceOf("declareIntVar")
+                    .add("varName", getCurrentForUserVar(scope, userDefinedName));
+        programBody = programBody + "\n" + output.render();
+        output = group.getInstanceOf("declareVecVar")
+                .add("varName", getNextVar());
+        programBody = programBody + "\n" + output.render();
+        output = group.getInstanceOf("swapVec")
+                .add("var1", loopVec)
+                .add("var2", getCurrentVar());
+        programBody = programBody + "\n" + output.render();
+
+        output = group.getInstanceOf("startGeneratorLoop")
+                .add("loopVec",loopVec)
+                .add("label1",label1)
+                .add("label2",label2)
+                .add("label3",label3)
+                .add("label4", label4)
+                .add("iter",iter)
+                .add("assignVec",assignVec)
+                .add("tempVar7",getNextVar())
+                .add("tempVar9",getNextVar())
+                .add("tempVar10",getNextVar())
+                .add("tempVar11",getNextVar())
+                .add("tempVar12",getNextVar())
+                .add("tempVar13",getNextVar())
+                .add("tempVar14",getNextVar())
+                .add("tempVar15",getNextVar());
+        programBody = programBody + "\n" + output.render();
+
+        visit(ctx.expr(1));
+
+        output = group.getInstanceOf("endGeneratorLoop")
+                .add("topOfStack",getCurrentVar())
+                .add("label1",label1)
+                .add("label3",label3)
+                .add("label4",label4)
+                .add("tempVar1",getNextVar())
+                .add("tempVar2",getNextVar())
+                .add("tempVar3",getNextVar())
+                .add("tempVar4",getNextVar())
+                .add("tempVar5",getNextVar())
+                .add("tempVar6",getNextVar())
+                .add("tempVar7",getNextVar())
+                .add("tempVar8",getNextVar())
+                .add("assignVec",assignVec)
+                .add("iter",iter)
+                .add("resultVar",getNextVar());
+        programBody = programBody + "\n" + output.render();
+
+
+        scope = scope.getParent();
+
+        return "vector";
+    }
 
 
     private String getCurrentVar() {

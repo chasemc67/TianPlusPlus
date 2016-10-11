@@ -535,6 +535,8 @@ public class InterpreterVisitor extends VCalcBaseVisitor<Stuff> {
         return returnValue;
     }
 
+
+
     private Stuff promoteInteger(Stuff left, Stuff right) {
         ArrayList<Integer> promotedVec = new ArrayList<Integer>();
         if (left.type.equals("vector") && !right.type.equals("vector")) {

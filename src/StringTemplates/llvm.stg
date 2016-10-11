@@ -85,6 +85,20 @@ define void @swapVec(i32** %x, i32** %y) #0 {
 }
 
 ; Function Attrs: nounwind uwtable
+define void @copyVec(i32** %x, i32** %y) #0 {
+  %1 = alloca i32**, align 8
+  %2 = alloca i32**, align 8
+  store i32** %x, i32*** %1, align 8
+  store i32** %y, i32*** %2, align 8
+  %3 = load i32*** %1, align 8
+  %4 = load i32** %3, align 8
+  %5 = load i32*** %2, align 8
+  store i32* %4, i32** %5, align 8
+  ret void
+}
+
+
+; Function Attrs: nounwind uwtable
 define void @makeRange(i32* %x, i32 %a, i32 %b) #0 {
   %1 = alloca i32*, align 8
   %2 = alloca i32, align 4
@@ -1190,6 +1204,10 @@ swapVec(var1, var2) ::= <<
 call void @swapVec(i32** %<var1>, i32** %<var2>) ;swap vector <var1> <var2>
 >>
 
+copyVec(var1, var2) ::= <<
+call void @copyVec(i32** %<var1>, i32** %<var2>) ;copy vector <var1> <var2>
+>>
+
 assignVecToVar(varName, len, size, tempVar1, tempVar2) ::= <<
 %<tempVar1> = call i8* @malloc(i64 <size>)
 %<tempVar2> = bitcast i8* %<tempVar1> to i32*
@@ -1417,6 +1435,57 @@ startLoop(loopVar, label2, label3, tempVar1, tempVar2) ::= <<
 <label2>: ;star loop statements
 >>
 
+startGeneratorLoop(loopVec, assignVec, iter, label1, label2, label3, label4, tempVar7, tempVar9, tempVar10, tempVar11, tempVar12, tempVar13, tempVar14, tempVar15) ::= <<
+
+
+      %<tempVar7> = alloca i32, align 4
+      %<assignVec> = alloca i32*, align 8
+      %<iter> = alloca i32, align 4
+
+    %<tempVar9> = load i32** %<loopVec>, align 8
+    %<tempVar10> = getelementptr inbounds i32* %<tempVar9>, i64 0
+    %<tempVar11> = load i32* %<tempVar10>, align 4
+    store i32 %<tempVar11>, i32* %<tempVar7>, align 4
+    %<tempVar12> = load i32* %<tempVar7>, align 4
+    call void @allocateVec(i32** %<assignVec>, i32 %<tempVar12>)
+    store i32 0, i32* %<iter>, align 4
+    br label %<label1>
+
+<label1>: ;generator loop ; [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+    %<tempVar13> = load i32* %<iter>, align 4
+    %<tempVar14> = load i32* %<tempVar7>, align 4
+    %<tempVar15> = icmp slt i32 %<tempVar13>, %<tempVar14>
+    br i1 %<tempVar15>, label %<label2>, label %<label4>
+<label2>:
+>>
+
+
+
+
+
+
+endGeneratorLoop(label1, label3, label4, tempVar1, tempVar2, tempVar3,tempVar4, tempVar5, tempVar6, tempVar7, tempVar8, iter, assignVec, topOfStack, resultVar) ::= <<
+    %<tempVar4> = load i32* %<iter>, align 4
+      %<tempVar5> = add nsw i32 %<tempVar4>, 1
+      %<tempVar6> = sext i32 %<tempVar5> to i64
+
+        %<tempVar3> = load i32* %<topOfStack>, align 4
+        %<tempVar1> = load i32** %<assignVec>, align 8
+        %<tempVar2> = getelementptr inbounds i32* %<tempVar1>, i64 %<tempVar6>
+        store i32 %<tempVar3>, i32* %<tempVar2>, align 4
+      br label %<label3>
+
+ <label3>:
+      %<tempVar7> = load i32* %<iter>, align 4
+      %<tempVar8> = add nsw i32 %<tempVar7>, 1
+      store i32 %<tempVar8>, i32* %<iter>, align 4
+      br label %<label1>  ;  generator  looop end; [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+
+<label4>:
+    <declareVecVar(resultVar)>
+    call void @swapVec(i32** %<resultVar>, i32** %<assignVec>)
+>>
+
 endLoop(label1, label3) ::= <<
     br label %<label1>
 
@@ -1436,11 +1505,12 @@ call void @setVectorToInt(i32* %<tempVar3>, i32 %<tempVar4>)
 
 indexVectorWithInt(vector, index, resultVar, tempVar1, tempVar2, tempVar3) ::= <<
 ; indexWithInt
-%<tempVar1> = load i32** %<vector>, align 8
 %<tempVar2> = load i32* %<index>, align 4
 %<resultVar> = alloca i32, align 4
-%<tempVar1> = call i32 @getVectorAtInt(i32* %<tempVar2>, i32 %<tempVar3>)
-store i32 %<tempVar1>, i32* %<resultVar>
+
+%<tempVar1> = load i32** %<vector>, align 8
+%<tempVar3> = call i32 @getVectorAtInt(i32* %<tempVar1>, i32 %<tempVar2>)
+store i32 %<tempVar3>, i32* %<resultVar>
 >>
 
 indexVectorWithVector(vector, index, resultVar, tempVar1, tempVar2, tempVar3, tempVar4) ::= <<
