@@ -526,6 +526,10 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
             ST output = group.getInstanceOf("indexVectorWithVector");
             output.add("vector", vecToIndex);
             output.add("index", indexExpr);
+            output.add("tempVar1", getNextVar());
+            output.add("tempVar2", getNextVar());
+            output.add("tempVar3", getNextVar());
+            output.add("tempVar4", getNextVar());
             output.add("resultVar", getNextVar());
             programBody = programBody + "\n" + output.render();
             return "vector";

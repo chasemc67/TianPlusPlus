@@ -1,0 +1,4 @@
+print([1 2 3][2]);
+vector v = [1 2 3];
+vector w = [0 2 3];
+print(v[w]);

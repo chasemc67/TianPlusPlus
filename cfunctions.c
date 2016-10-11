@@ -155,6 +155,16 @@ int getVectorAtInt(int * vector, int index) {
     return vector[index+1];
 }
 
+// [3 1 2 3] at [3 0 2 3] -> [1 3 0]
+void getVectorAtVector(int * newVector, int * vector, int * index) {
+    for (int i = 1; i <= index[0]; i++) {
+        if (vector[0] <= index[i])
+            newVector[i] = 0;
+        else 
+            newVector[i] = vector[index[i] + 1];
+    }
+}
+
 int main(int argc, char *argv[])
 {
     /*int *x;
