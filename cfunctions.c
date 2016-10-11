@@ -20,12 +20,133 @@ void swapVec(int **x, int **y) {
     *x = *y;
     *y = tmp;
 }
+
+int getMaxSize(int * var, int* var2) {
+    if (var[0] > var2[0]) {
+        return var[0];
+    } else {
+        return var2[0];
+    }
+}
+
+void addVars(int * newVar, int * var1, int* var2) {
+
+    for (int i = 1; i <= newVar[0]; i++) {
+        if (i >= var1[0]+1) {
+            newVar[i] = var2[i];
+        } else if (i >= var2[0] + 1) {
+            newVar[i] = var1[i];
+        } else {
+            newVar[i] = var1[i] + var2[i];
+        }
+    }
+}
+
+void subVars(int * newVar, int * var1, int* var2) {
+
+    for (int i = 1; i <= newVar[0]; i++) {
+        if (i >= var1[0]+1) {
+            newVar[i] = var2[i];
+        } else if (i >= var2[0] + 1) {
+            newVar[i] = var1[i];
+        } else {
+            newVar[i] = var1[i] - var2[i];
+        }
+    }
+}
+
+void mulVars(int * newVar, int * var1, int* var2) {
+
+    for (int i = 1; i <= newVar[0]; i++) {
+        if (i >= var1[0]+1) {
+            newVar[i] = var2[i];
+        } else if (i >= var2[0] + 1) {
+            newVar[i] = var1[i];
+        } else {
+            newVar[i] = var1[i] * var2[i];
+        }
+    }
+}
+
+void divVars(int * newVar, int * var1, int* var2) {
+
+    for (int i = 1; i <= newVar[0]; i++) {
+        if (i >= var1[0]+1) {
+            newVar[i] = var2[i];
+        } else if (i >= var2[0] + 1) {
+            newVar[i] = var1[i];
+        } else {
+            newVar[i] = var1[i] / var2[i];
+        }
+    }
+}
+
+void equalVars(int * newVar, int * var1, int* var2) {
+
+    for (int i = 1; i <= newVar[0]; i++) {
+        if (i >= var1[0]+1) {
+            newVar[i] = (var2[i] == 0);
+        } else if (i >= var2[0] + 1) {
+            newVar[i] = (var1[i] == 0);
+        } else {
+            newVar[i] = var1[i] == var2[i];
+        }
+    }
+}
+
+void notEqualsVars(int * newVar, int * var1, int* var2) {
+
+    for (int i = 1; i <= newVar[0]; i++) {
+        if (i >= var1[0]+1) {
+            newVar[i] = (var2[i] != 0);
+        } else if (i >= var2[0] + 1) {
+            newVar[i] = (var1[i] != 0);
+        } else {
+            newVar[i] = var1[i] != var2[i];
+        }
+    }
+}
+
+void lessVars(int * newVar, int * var1, int* var2) {
+
+    for (int i = 1; i <= newVar[0]; i++) {
+        if (i >= var1[0]+1) {
+            newVar[i] = (var2[i] < 0);
+        } else if (i >= var2[0] + 1) {
+            newVar[i] = (var1[i] < 0);
+        } else {
+            newVar[i] = var1[i] < var2[i];
+        }
+    }
+}
+
+void greatVars(int * newVar, int * var1, int* var2) {
+
+    for (int i = 1; i <= newVar[0]; i++) {
+        if (i >= var1[0]+1) {
+            newVar[i] = (var2[i] > 0);
+        } else if (i >= var2[0] + 1) {
+            newVar[i] = (var1[i] > 0);
+        } else {
+            newVar[i] = var1[i] > var2[i];
+        }
+    }
+}
+
+
+
 void makeRange(int *x, int a, int b) {
 	int size = (b +1)- a > 0 ? (b+1) - a : 0;
 
 	for(int i = 1; i <= size; i++) {
 		x[i] = a+i-1;
 	}
+}
+
+void setVectorToInt(int * newVar, int value) {
+    for (int i = 1; i <= newVar[0]; i++) {
+        newVar[i] = value;
+    }
 }
 
 int main(int argc, char *argv[])

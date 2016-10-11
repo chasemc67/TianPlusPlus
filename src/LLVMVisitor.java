@@ -170,27 +170,61 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 
 	@Override
     public String visitExprMulDiv(VCalcParser.ExprMulDivContext ctx) {
-    	visit(ctx.expr(0));
+    	String leftType = visit(ctx.expr(0));
     	String leftVar = this.getCurrentVar();
-    	visit(ctx.expr(1));
+    	String rightType = visit(ctx.expr(1));
     	String rightVar = this.getCurrentVar();
+
+        if (!leftType.equals(rightType)) {
+            if (leftType.equals("int")) {
+                promoteVar(leftVar, rightVar);
+                leftVar = this.getCurrentVar();
+                leftType = "vector";
+            } else {
+                promoteVar(rightVar, leftVar);
+                rightVar = this.getCurrentVar();
+                rightType = "vector";
+            }
+        }
 
     	ST output;
 
-    	if (ctx.op.getType() == VCalcParser.MUL) {
-    		output = group.getInstanceOf("integerMul");
-    	} else {
-    		output = group.getInstanceOf("integerDiv");
-    	}
-    	ST output2 = output.add("leftVar", leftVar);
-    	ST output3 = output.add("rightVar", rightVar);
-    	ST output4 = output.add("tempVar1", getNextVar());
-    	ST output5 = output.add("tempVar2", getNextVar());
-    	ST output6 = output.add("tempVar3", getNextVar());
-    	ST output7 = output.add("resultVar", getNextVar());
+        if (leftType.equals("int") && rightType.equals("int")) {
 
-    	programBody = programBody + "\n" + output.render();
-    	return "int";
+        	if (ctx.op.getType() == VCalcParser.MUL) {
+        		output = group.getInstanceOf("integerMul");
+        	} else {
+        		output = group.getInstanceOf("integerDiv");
+        	}
+        	ST output2 = output.add("leftVar", leftVar);
+        	ST output3 = output.add("rightVar", rightVar);
+        	ST output4 = output.add("tempVar1", getNextVar());
+        	ST output5 = output.add("tempVar2", getNextVar());
+        	ST output6 = output.add("tempVar3", getNextVar());
+        	ST output7 = output.add("resultVar", getNextVar());
+
+        	programBody = programBody + "\n" + output.render();
+         	return "int";
+        } else if (leftType.equals("vector") && rightType.equals("vector")) {
+            if (ctx.op.getType() == VCalcParser.MUL) {
+                output = group.getInstanceOf("vectorMul");
+            } else {
+                output = group.getInstanceOf("vectorDiv");
+            }
+            ST output2 = output.add("leftVar", leftVar);
+            ST output3 = output.add("rightVar", rightVar);
+            ST output4 = output.add("tempVar1", getNextVar());
+            ST output5 = output.add("tempVar2", getNextVar());
+            ST output6 = output.add("tempVar3", getNextVar());
+            output.add("tempVar4", getNextVar());
+            ST output7 = output.add("resultVar", getNextVar());
+
+            programBody = programBody + "\n" + output.render();
+            return "vector";
+        } else {
+            System.out.println("I can't do integer promotion yet");
+            return "vector";
+        }
     }
 
 
@@ -223,7 +257,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
             if (ctx.op.getType() == VCalcParser.ADD) {
                 output = group.getInstanceOf("vectorAdd");
             } else {
-                output = group.getInstanceOf("vectorAdd");
+                output = group.getInstanceOf("vectorSub");
             }
             ST output2 = output.add("leftVar", leftVar);
             ST output3 = output.add("rightVar", rightVar);
@@ -243,56 +277,100 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 
     @Override
 	public String visitExprGreatLess(VCalcParser.ExprGreatLessContext ctx) {
-		visit(ctx.expr(0));
+		String leftType = visit(ctx.expr(0));
 		String leftVar = this.getCurrentVar();
-		visit(ctx.expr(1));
+		String rightType = visit(ctx.expr(1));
 		String rightVar = this.getCurrentVar();
 
 		ST output;
 
-		if (ctx.op.getType() == VCalcParser.GREAT) {
-			output = group.getInstanceOf("integerGreat");
-		} else {
-			output = group.getInstanceOf("integerLess");
-		}
-		ST output2 = output.add("leftVar", leftVar);
-		ST output3 = output.add("rightVar", rightVar);
-		ST output4 = output.add("tempVar1", getNextVar());
-		ST output5 = output.add("tempVar2", getNextVar());
-		ST output6 = output.add("tempVar3", getNextVar());
-		ST output7 = output.add("tempVar4", getNextVar());
-		ST output8 = output.add("resultVar", getNextVar());
+        if (leftType.equals("int") && rightType.equals("int")) {
 
-		programBody = programBody + "\n" + output.render();
-		return "int";
+    		if (ctx.op.getType() == VCalcParser.GREAT) {
+    			output = group.getInstanceOf("integerGreat");
+    		} else {
+    			output = group.getInstanceOf("integerLess");
+    		}
+    		ST output2 = output.add("leftVar", leftVar);
+    		ST output3 = output.add("rightVar", rightVar);
+    		ST output4 = output.add("tempVar1", getNextVar());
+    		ST output5 = output.add("tempVar2", getNextVar());
+    		ST output6 = output.add("tempVar3", getNextVar());
+    		ST output7 = output.add("tempVar4", getNextVar());
+    		ST output8 = output.add("resultVar", getNextVar());
+
+    		programBody = programBody + "\n" + output.render();
+    		return "int";
+        } else if (leftType.equals("vector") && rightType.equals("vector")) {
+            if (ctx.op.getType() == VCalcParser.GREAT) {
+                output = group.getInstanceOf("vectorGreat");
+            } else {
+                output = group.getInstanceOf("vectorLess");
+            }
+            ST output2 = output.add("leftVar", leftVar);
+            ST output3 = output.add("rightVar", rightVar);
+            ST output4 = output.add("tempVar1", getNextVar());
+            ST output5 = output.add("tempVar2", getNextVar());
+            ST output6 = output.add("tempVar3", getNextVar());
+            ST output7 = output.add("tempVar4", getNextVar());
+            ST output8 = output.add("resultVar", getNextVar());
+
+            programBody = programBody + "\n" + output.render();
+            return "vector";
+        } else {
+            System.out.println("I can't do integer promotion yet");
+            return "vector";
+        }
 	}
 
 
 
 	@Override
 	public String visitExprEqual(VCalcParser.ExprEqualContext ctx) {
-		visit(ctx.expr(0));
+		String leftType = visit(ctx.expr(0));
 		String leftVar = this.getCurrentVar();
-		visit(ctx.expr(1));
+		String rightType = visit(ctx.expr(1));
 		String rightVar = this.getCurrentVar();
 
 		ST output;
 
-		if (ctx.op.getType() == VCalcParser.EQUAL) {
-			output = group.getInstanceOf("integerEquals");
-		} else {
-			output = group.getInstanceOf("integerNotEquals");
-		}
-		ST output2 = output.add("leftVar", leftVar);
-		ST output3 = output.add("rightVar", rightVar);
-		ST output4 = output.add("tempVar1", getNextVar());
-		ST output5 = output.add("tempVar2", getNextVar());
-		ST output6 = output.add("tempVar3", getNextVar());
-		ST output7 = output.add("tempVar4", getNextVar());
-		ST output8 = output.add("resultVar", getNextVar());
+        if (leftType.equals("int") && rightType.equals("int")) {
 
-		programBody = programBody + "\n" + output.render();
-		return "int";
+    		if (ctx.op.getType() == VCalcParser.EQUAL) {
+    			output = group.getInstanceOf("integerEquals");
+    		} else {
+    			output = group.getInstanceOf("integerNotEquals");
+    		}
+    		ST output2 = output.add("leftVar", leftVar);
+    		ST output3 = output.add("rightVar", rightVar);
+    		ST output4 = output.add("tempVar1", getNextVar());
+    		ST output5 = output.add("tempVar2", getNextVar());
+    		ST output6 = output.add("tempVar3", getNextVar());
+    		ST output7 = output.add("tempVar4", getNextVar());
+    		ST output8 = output.add("resultVar", getNextVar());
+
+    		programBody = programBody + "\n" + output.render();
+    		return "int";
+        } else if (leftType.equals("vector") && rightType.equals("vector")) {
+            if (ctx.op.getType() == VCalcParser.EQUAL) {
+                output = group.getInstanceOf("vectorEqual");
+            } else {
+                output = group.getInstanceOf("vectorNotEqual");
+            }
+            ST output2 = output.add("leftVar", leftVar);
+            ST output3 = output.add("rightVar", rightVar);
+            ST output4 = output.add("tempVar1", getNextVar());
+            ST output5 = output.add("tempVar2", getNextVar());
+            ST output6 = output.add("tempVar3", getNextVar());
+            ST output7 = output.add("tempVar4", getNextVar());
+            ST output8 = output.add("resultVar", getNextVar());
+
+            programBody = programBody + "\n" + output.render();
+            return "vector";
+        } else {
+            System.out.println("I can't do integer promotion yet");
+            return "vector";
+        }
 	}
 
     @Override 
@@ -377,5 +455,19 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
     private String getNextForUserVar(LLVMScope scope, String userDefinedName) {
         scope.incrementVarCounter(userDefinedName);
     	return this.getCurrentForUserVar(scope, userDefinedName);
+    }
+
+    private void promoteVar(String varName, String vectorName) {
+        ST output = group.getInstanceOf("promoteInt");
+        output.add("intVar", varName);
+        output.add("vectorVar", vectorName);
+        output.add("tempVar1", getNextVar());
+        output.add("tempVar2", getNextVar());
+        output.add("tempVar3", getNextVar());
+        output.add("tempVar4", getNextVar());
+        output.add("resultVar", getNextVar());
+
+        programBody = programBody + "\n" + output.render();
+        return;
     }
 }
