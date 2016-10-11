@@ -1392,13 +1392,35 @@ startIf(ifVar, label1, label2, tempVar1, tempVar2) ::= <<
     %<tempVar2> = icmp ne i32 %<tempVar1>, 0
     br i1 %<tempVar2>, label %<label1>, label %<label2>
 
-; \<label>:%<label1> ;startIf
+<label1>: ;startIf
 >>
 
 endIf(label2) ::= <<
     br label %<label2>
 
-; \<label>:%<label2> ;endIf
+<label2>: ;endIf
+>>
+
+
+
+initLoop(label1) ::= <<
+    br label %<label1>
+
+<label1>: ;start loop
+>>
+
+startLoop(loopVar, label2, label3, tempVar1, tempVar2) ::= <<
+    %<tempVar1> = load i32* %<loopVar>, align 4
+    %<tempVar2> = icmp ne i32 %<tempVar1>, 0
+    br i1 %<tempVar2>, label %<label2>, label %<label3>
+
+<label2>: ;star loop statements
+>>
+
+endLoop(label1, label3) ::= <<
+    br label %<label1>
+
+<label3>: ;end loop
 >>
 
 promoteInt(intVar, vectorVar, resultVar, tempVar1, tempVar2, tempVar3, tempVar4) ::= <<
@@ -1431,6 +1453,7 @@ call void @allocateVec(i32** %<resultVar>, i32 %<tempVar1>)
 %<tempVar4> = load i32** %<resultVar>, align 8
 call void @getVectorAtVector(i32* %<tempVar4>, i32* %<tempVar2>, i32* %<tempVar3>);
 >>
+
 
 
 

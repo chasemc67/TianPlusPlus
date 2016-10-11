@@ -1,3 +1,4 @@
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -441,10 +442,8 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
         String ifVar = this.getCurrentVar();
 
 
-        int label1 = IfCount;
-        IfCount++;
-        int label2 = IfCount;
-        IfCount++;
+        String label1 = getNextVar();
+        String label2 = getNextVar();
 
 
         ST output = group.getInstanceOf("startIf")
@@ -464,6 +463,44 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 
         output = group.getInstanceOf("endIf")
                 .add("label2", label2);
+        programBody = programBody + "\n" + output.render();
+
+        return null;
+    }
+
+    public String visitLoop(VCalcParser.LoopContext ctx) {
+        String label1 = getNextVar();
+
+        String label2 = getNextVar();
+
+        String label3 = getNextVar();
+
+        ST output = group.getInstanceOf("initLoop")
+                .add("label1", label1);
+        programBody = programBody + "\n" + output.render();
+
+
+        visit(ctx.expr());
+
+        String loopVar = this.getCurrentVar();
+
+        output = group.getInstanceOf("startLoop")
+                .add("loopVar", loopVar)
+                .add("label2", label2)
+                .add("label3", label3)
+                .add("tempVar1", getNextVar())
+                .add("tempVar2", getNextVar());
+        programBody = programBody + "\n" + output.render();
+
+        scope = new LLVMScope(scope);
+        for (VCalcParser.StatementContext stat: ctx.statement()) {
+            visit(stat);
+        }
+        scope = scope.getParent();
+
+        output = group.getInstanceOf("endLoop")
+                .add("label3", label3)
+                .add("label1", label1);
         programBody = programBody + "\n" + output.render();
 
         return null;

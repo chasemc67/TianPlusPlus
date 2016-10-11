@@ -1,0 +1,10 @@
+int i = 0;
+int b = 0;
+loop (i < 5)
+        i = i + 1;
+        loop(b<2)
+            print(b);
+            b = b + 1;
+        pool;
+pool;
+
