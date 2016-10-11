@@ -196,27 +196,49 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 
 	@Override
     public String visitExprAddSub(VCalcParser.ExprAddSubContext ctx) {
-    	visit(ctx.expr(0));
+    	String leftType = visit(ctx.expr(0));
     	String leftVar = this.getCurrentVar();
-    	visit(ctx.expr(1));
+    	String rightType = visit(ctx.expr(1));
     	String rightVar = this.getCurrentVar();
 
     	ST output;
 
-    	if (ctx.op.getType() == VCalcParser.ADD) {
-    		output = group.getInstanceOf("integerAdd");
-    	} else {
-    		output = group.getInstanceOf("integerSub");
-    	}
-    	ST output2 = output.add("leftVar", leftVar);
-    	ST output3 = output.add("rightVar", rightVar);
-    	ST output4 = output.add("tempVar1", getNextVar());
-    	ST output5 = output.add("tempVar2", getNextVar());
-    	ST output6 = output.add("tempVar3", getNextVar());
-    	ST output7 = output.add("resultVar", getNextVar());
+        if (leftType.equals("int") && rightType.equals("int")) {
 
-    	programBody = programBody + "\n" + output.render();
-    	return "int";
+        	if (ctx.op.getType() == VCalcParser.ADD) {
+        		output = group.getInstanceOf("integerAdd");
+        	} else {
+        		output = group.getInstanceOf("integerSub");
+        	}
+        	ST output2 = output.add("leftVar", leftVar);
+        	ST output3 = output.add("rightVar", rightVar);
+        	ST output4 = output.add("tempVar1", getNextVar());
+        	ST output5 = output.add("tempVar2", getNextVar());
+        	ST output6 = output.add("tempVar3", getNextVar());
+        	ST output7 = output.add("resultVar", getNextVar());
+
+        	programBody = programBody + "\n" + output.render();
+        	return "int";
+        } else if (leftType.equals("vector") && rightType.equals("vector")) {
+            if (ctx.op.getType() == VCalcParser.ADD) {
+                output = group.getInstanceOf("vectorAdd");
+            } else {
+                output = group.getInstanceOf("vectorAdd");
+            }
+            ST output2 = output.add("leftVar", leftVar);
+            ST output3 = output.add("rightVar", rightVar);
+            ST output4 = output.add("tempVar1", getNextVar());
+            ST output5 = output.add("tempVar2", getNextVar());
+            ST output6 = output.add("tempVar3", getNextVar());
+            output.add("tempVar4", getNextVar());
+            ST output7 = output.add("resultVar", getNextVar());
+            programBody = programBody + "\n" + output.render();
+            return "vector";
+        } else {
+            System.out.println("I can't do integer promotion yet");
+            return "vector";
+        }
+
     }
 
     @Override
