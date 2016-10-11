@@ -51,6 +51,8 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 		return null;
 	}
 
+    @Override public String visitExprBrac(VCalcParser.ExprBracContext ctx) { return visit(ctx.expr()); }
+
 	@Override
     public String visitDeclAsn(VCalcParser.DeclAsnContext ctx) {
     	String userDefinedName = ctx.assignment().ID().getText();
@@ -107,14 +109,15 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 			ST output3 = output.add("assignResult", exprResult);
 			ST output4 = output.add("tempVar1", getNextVar());
 			programBody = programBody + "\n" + output.render();
+            return "int";
 		} else {
             ST output = group.getInstanceOf("swapVec")
                     .add("var1", this.getCurrentForUserVar(scope, userDefinedName))
                     .add("var2", exprResult);
             programBody = programBody + "\n ;-------- \n" + output.render();
             currentType = "vector";
+            return "vector";
 		}
-    	return null;
     }
 
 	@Override
@@ -238,6 +241,18 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
     	String rightType = visit(ctx.expr(1));
     	String rightVar = this.getCurrentVar();
 
+        if (!leftType.equals(rightType)) {
+            if (leftType.equals("int")) {
+                promoteVar(leftVar, rightVar);
+                leftVar = this.getCurrentVar();
+                leftType = "vector";
+            } else {
+                promoteVar(rightVar, leftVar);
+                rightVar = this.getCurrentVar();
+                rightType = "vector";
+            }
+        }
+
     	ST output;
 
         if (leftType.equals("int") && rightType.equals("int")) {
@@ -284,6 +299,18 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 		String leftVar = this.getCurrentVar();
 		String rightType = visit(ctx.expr(1));
 		String rightVar = this.getCurrentVar();
+
+        if (!leftType.equals(rightType)) {
+            if (leftType.equals("int")) {
+                promoteVar(leftVar, rightVar);
+                leftVar = this.getCurrentVar();
+                leftType = "vector";
+            } else {
+                promoteVar(rightVar, leftVar);
+                rightVar = this.getCurrentVar();
+                rightType = "vector";
+            }
+        }
 
 		ST output;
 
@@ -334,6 +361,18 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 		String leftVar = this.getCurrentVar();
 		String rightType = visit(ctx.expr(1));
 		String rightVar = this.getCurrentVar();
+
+        if (!leftType.equals(rightType)) {
+            if (leftType.equals("int")) {
+                promoteVar(leftVar, rightVar);
+                leftVar = this.getCurrentVar();
+                leftType = "vector";
+            } else {
+                promoteVar(rightVar, leftVar);
+                rightVar = this.getCurrentVar();
+                rightType = "vector";
+            }
+        }
 
 		ST output;
 
