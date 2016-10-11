@@ -1042,6 +1042,39 @@ define void @setVectorToInt(i32* %newVar, i32 %value) #0 {
 }
 
 ; Function Attrs: nounwind uwtable
+define i32 @getVectorAtInt(i32* %vector, i32 %index) #0 {
+  %1 = alloca i32, align 4
+  %2 = alloca i32*, align 8
+  %3 = alloca i32, align 4
+  store i32* %vector, i32** %2, align 8
+  store i32 %index, i32* %3, align 4
+  %4 = load i32** %2, align 8
+  %5 = getelementptr inbounds i32* %4, i64 0
+  %6 = load i32* %5, align 4
+  %7 = load i32* %3, align 4
+  %8 = icmp sle i32 %6, %7
+  br i1 %8, label %9, label %10
+
+; <label>:9                                       ; preds = %0
+  store i32 0, i32* %1
+  br label %17
+
+; <label>:10                                      ; preds = %0
+  %11 = load i32* %3, align 4
+  %12 = add nsw i32 %11, 1
+  %13 = sext i32 %12 to i64
+  %14 = load i32** %2, align 8
+  %15 = getelementptr inbounds i32* %14, i64 %13
+  %16 = load i32* %15, align 4
+  store i32 %16, i32* %1
+  br label %17
+
+; <label>:17                                      ; preds = %10, %9
+  %18 = load i32* %1
+  ret i32 %18
+}
+
+; Function Attrs: nounwind uwtable
 define i32 @main(i32 %argc, i8** %argv) #0 {
   %1 = alloca i32, align 4
   %2 = alloca i8**, align 8

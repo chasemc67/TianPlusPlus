@@ -149,6 +149,12 @@ void setVectorToInt(int * newVar, int value) {
     }
 }
 
+int getVectorAtInt(int * vector, int index) {
+    if (vector[0] <= index) 
+        return 0;
+    return vector[index+1];
+}
+
 int main(int argc, char *argv[])
 {
     /*int *x;

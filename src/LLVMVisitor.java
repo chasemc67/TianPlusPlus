@@ -428,11 +428,38 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
         output = group.getInstanceOf("swapVec")
                 .add("var1", thisVector)
                 .add("var2", this.getCurrentVar());
-        programBody = programBody + "\n;!!!!!\n" + output.render();
+        programBody = programBody + "\n" + output.render();
 
 		currentType = "vector";
         return "vector";
     }
+
+    @Override
+    public String visitExprIndex(VCalcParser.ExprIndexContext ctx) {
+        visit(ctx.expr(0));
+        String vecToIndex = getCurrentVar();
+        String exprType = visit(ctx.expr(1));
+        String indexExpr = getCurrentVar();
+
+        if (exprType.equals("int")) {
+            ST output = group.getInstanceOf("indexVectorWithInt");
+            output.add("vector", vecToIndex);
+            output.add("index", indexExpr);
+            output.add("tempVar1", getNextVar());
+            output.add("tempVar2", getNextVar());
+            output.add("tempVar3", getNextVar());
+            output.add("resultVar", getNextVar());
+            programBody = programBody + "\n" + output.render();
+            return "int";
+        } else {
+            ST output = group.getInstanceOf("indexVectorWithVector");
+            output.add("vector", vecToIndex);
+            output.add("index", indexExpr);
+            output.add("resultVar", getNextVar());
+            programBody = programBody + "\n" + output.render();
+            return "vector";
+        }
+    }    
 
 
     private String getCurrentVar() {
