@@ -1,7 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stringtemplate.v4.*;
 
 public class LLVMVisitor extends VCalcBaseVisitor<String> {
@@ -35,6 +34,8 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
 	Map<String, Integer> userVarCounter = new HashMap<String, Integer>();
 
     String currentType = "int";
+
+    int IfCount = 4;
 
 
 	@Override
@@ -83,6 +84,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
             ST output = group.getInstanceOf("declareIntVar");
             ST output2 = output.add("varName", getCurrentForUserVar(scope, userDefinedName));
             programBody = programBody + "\n" + output.render();
+
         } else {
             scope.addToScope(userDefinedName, getLLVMVarName(scope, userDefinedName), "vector");
             ST output = group.getInstanceOf("declareVecVar")
@@ -434,7 +436,39 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
         return "vector";
     }
 
-    @Override
+    public String visitConditional(VCalcParser.ConditionalContext ctx) {
+        visit(ctx.expr());
+        String ifVar = this.getCurrentVar();
+
+
+        int label1 = IfCount;
+        IfCount++;
+        int label2 = IfCount;
+        IfCount++;
+
+
+        ST output = group.getInstanceOf("startIf")
+                    .add("ifVar", ifVar)
+                    .add("label1", label1)
+                    .add("label2", label2)
+                    .add("tempVar1", getNextVar())
+                    .add("tempVar2", getNextVar());
+
+        programBody = programBody + "\n" + output.render();
+
+        scope = new LLVMScope(scope);
+        for (VCalcParser.StatementContext stat: ctx.statement()) {
+            visit(stat);
+        }
+        scope = scope.getParent();
+
+        output = group.getInstanceOf("endIf")
+                .add("label2", label2);
+        programBody = programBody + "\n" + output.render();
+
+        return null;
+    }
+
     public String visitExprIndex(VCalcParser.ExprIndexContext ctx) {
         visit(ctx.expr(0));
         String vecToIndex = getCurrentVar();
@@ -462,6 +496,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
     }    
 
 
+
     private String getCurrentVar() {
     	return "var" + varCounter.toString();
     }
@@ -472,7 +507,7 @@ public class LLVMVisitor extends VCalcBaseVisitor<String> {
     }
 
     private String getLLVMVarName(LLVMScope scope, String userDefinedName) {
-        return "s" + scope.getScopeNumber() + "var" + userDefinedName;
+        return "s" + scope.getScopeNumber(userDefinedName) + "var" + userDefinedName;
     }
 
     private String getCurrentForUserVar(LLVMScope scope, String userDefinedName) {
